@@ -13,7 +13,7 @@ class Winamax():
 	def data(self):
 		if not self._data:
 			url = f"https://www.winamax.fr/paris-sportifs/sports/"
-			response = self.session.get(url)
+			response = requests.get(url)
 			self._data = self.extract(response.text)
 		return self._data
 
