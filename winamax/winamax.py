@@ -6,11 +6,6 @@ from http.cookiejar import LWPCookieJar
 
 class Winamax():
 	def __init__(self):
-		COOKIE_FILE = "./coojies.jar"
-		self.session = requests.Session()
-		self.session.cookies = LWPCookieJar()
-		if not os.path.exists(COOKIE_FILE):
-			self.session.cookies.save(COOKIE_FILE)
 		self._data = None
 
 
