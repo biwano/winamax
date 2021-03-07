@@ -1,0 +1,1 @@
+from .winamax import Winamax
