@@ -33,6 +33,13 @@ class Winamax():
 		thing = self.data[f"{type}"].get(type_id)
 		return thing
 
+	def get_sport(self, sport_id):
+		sport = self.get_thing("sports", sport_id)
+		if sport and "categories" in sport:
+			del sport["categories"]
+			del sport["filters"]
+		return sport
+
 	def get_outcome(self, outcome_id):
 		outcome = self.get_thing("outcomes", outcome_id)
 		return outcome
@@ -44,8 +51,9 @@ class Winamax():
 			for i in range(len(bet["outcomes"])):
 				outcome_id = bet["outcomes"][i]
 				bet["outcomes"][i] = self.get_outcome(outcome_id)
-				bet["outcomes"][i]["outcomeId"] = outcome_id
-				bet["outcomes"][i]["odds"] = self.get_thing("odds", outcome_id)
+				if bet["outcomes"][i]:
+					bet["outcomes"][i]["outcomeId"] = outcome_id
+					bet["outcomes"][i]["odds"] = self.get_thing("odds", outcome_id)
 
 		return bet
 
@@ -54,6 +62,8 @@ class Winamax():
 		match = self.get_thing("matches", match_id)
 		if match:
 			match["bet"] = self.get_bet(match["mainBetId"])
+			match["sport"] = self.get_sport(match["sportId"])
+			del match["filters"]
 		return match
 
 	def get_matches(self):
