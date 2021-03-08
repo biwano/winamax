@@ -17,9 +17,8 @@ class Cli:
 
     def update_cache(self, **kwargs):
         cache = args.type
-        func = getattr(self.winamax, f"get_{cache}")
-        with open(f'./storage/{cache}.json', 'w') as outfile:
-            json.dump(func(), outfile, indent=4)
+        self.winamax.update_cache()
+
 
 winamax=Winamax()
 

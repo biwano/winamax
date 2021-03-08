@@ -1,0 +1,6 @@
+__pycache__
+venv
+storage
+*.egg-info
+*.sublime*
+cache.json

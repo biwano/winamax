@@ -25,6 +25,7 @@ setuptools.setup(
     ],
     install_requires=[
         "sqlalchemy",
-        "requests"
+        "requests",
+        "flask"
     ]
 )
