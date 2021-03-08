@@ -25,7 +25,12 @@ def get_matches(sport_id=None):
 def get_match(match_id=None):
     return jsonify(winamax.get_match(match_id=match_id))
 
-# match history
-@app.route('/matches/<int:match_id>/history')
-def get_match_history(match_id=None):
-    return jsonify(winamax.get_match_history(match_id=match_id))
+# outcome
+@app.route('/outcomes/<int:outcome_id>')
+def get_outcome(outcome_id=None):
+	return jsonify(winamax.get_outcome(outcome_id=outcome_id))
+
+# outcome history
+@app.route('/outcomes/<int:outcome_id>/history')
+def get_outcome_history(outcome_id=None):
+    return jsonify(winamax.get_outcome_history(outcome_id=outcome_id))

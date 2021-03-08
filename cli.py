@@ -22,6 +22,9 @@ class Cli:
     def take_outcomes_snapshot(self, **kwargs):
         self.winamax.take_outcomes_snapshot()
 
+    def clean_outcome_history(self, **kwargs):
+        self.winamax.clean_outcome_history()
+
 
 cli = Cli(args)
 getattr(cli, args.action)()

@@ -59,7 +59,8 @@ class Winamax():
 
     def get_outcome(self, outcome_id):
         outcome = self.get_thing("outcomes", outcome_id)
-        outcome["outcomeId"] = outcome_id
+        if outcome:
+            outcome["outcomeId"] = outcome_id
         return outcome
 
     def get_bet(self, bet_id):
@@ -102,9 +103,11 @@ class Winamax():
 
     def get_outcomes(self):
         res = []
-        print(self.data["outcomes"])
         for outcome_id, outcome in self.data["outcomes"].items():
-            res.append(self.get_outcome(outcome_id))
+            outcome = self.get_outcome(outcome_id)
+            if outcome:
+                outcome["odds"] = self.get_thing("odds", outcome_id)
+                res.append(outcome)
         return res
 
 
@@ -123,6 +126,16 @@ class Winamax():
         with self.Session() as session:
             history = session.query(db.History).filter_by(outcome_id=outcome_id)
             return self.serialize_all(history.all())
+
+    def clean_outcome_history(self):
+        res = []
+        with self.Session() as session:
+            history = session.query(db.History.outcome_id).distinct()
+            for outcome_id, in history:
+                if not self.get_outcome(outcome_id):
+                    session.query(db.History).filter_by(outcome_id=outcome_id).delete(synchronize_session=False)
+                    res.append(outcome_id)
+        return res            
             
     def serialize(self, history):
         return {

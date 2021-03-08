@@ -42,6 +42,9 @@ export default {
   },
   created() {
     this.load();
+    window.setInterval(() => {
+      this.load();
+    }, 10000);
   }
 }
 </script>
