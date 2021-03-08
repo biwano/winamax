@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
  
 setuptools.setup(
-    name="ftxbot",
+    name="winamax",
     version="0.0.1",
     author="Bruno Ilponse",
     author_email="bruno.ilponse@gmail.com",
@@ -26,6 +26,7 @@ setuptools.setup(
     install_requires=[
         "sqlalchemy",
         "requests",
-        "flask"
+        "flask",
+        "flask_cors"
     ]
 )

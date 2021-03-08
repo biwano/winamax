@@ -52,11 +52,9 @@ class Winamax():
     def get_sport(self, sport_id):
         sport = self.get_thing("sports", sport_id)
         if sport and "categories" in sport:
+            sport["sportId"] = sport_id
             del sport["categories"]
             del sport["filters"]
-            del sport["liveMatchCount"]
-            del sport["mainMatchCount"]
-            del sport["tvMatchCount"]
         return sport
 
     def get_outcome(self, outcome_id):

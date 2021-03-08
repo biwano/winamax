@@ -1,7 +1,10 @@
 from flask import Flask, Response
+from flask_cors import CORS
 from winamax import Winamax
 import json
+
 app = Flask(__name__)
+cors = CORS(app)
 
 winamax = Winamax()
 
