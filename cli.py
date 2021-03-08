@@ -19,8 +19,9 @@ class Cli:
         cache = args.type
         self.winamax.update_cache()
 
+    def take_outcomes_snapshot(self, **kwargs):
+        self.winamax.take_outcomes_snapshot()
 
-winamax=Winamax()
 
 cli = Cli(args)
 getattr(cli, args.action)()

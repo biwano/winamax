@@ -2,12 +2,15 @@ import requests
 import re
 import json
 import os
+from datetime import datetime
 from http.cookiejar import LWPCookieJar
 import copy
+from . import db
 
 class Winamax():
     def __init__(self):
         self._data = None
+        self.Session = db.Session()
 
     def extract(self, text):
         p= re.compile('var PRELOADED_STATE = (\{((?!\<script).)*});')
@@ -27,7 +30,6 @@ class Winamax():
         except:
             self.update_cache()
             return self.get_cache()
-
 
     def update_cache(self):
         data = self.get_remote_data()
@@ -52,14 +54,19 @@ class Winamax():
         if sport and "categories" in sport:
             del sport["categories"]
             del sport["filters"]
+            del sport["liveMatchCount"]
+            del sport["mainMatchCount"]
+            del sport["tvMatchCount"]
         return sport
 
     def get_outcome(self, outcome_id):
         outcome = self.get_thing("outcomes", outcome_id)
+        outcome["outcomeId"] = outcome_id
         return outcome
 
     def get_bet(self, bet_id):
         bet = self.get_thing("bets", bet_id)
+        """
         if bet:
             outcomes = {}
             for i in range(len(bet["outcomes"])):
@@ -68,6 +75,7 @@ class Winamax():
                 if bet["outcomes"][i]:
                     bet["outcomes"][i]["outcomeId"] = outcome_id
                     bet["outcomes"][i]["odds"] = self.get_thing("odds", outcome_id)
+        """
 
         return bet
 
@@ -82,22 +90,11 @@ class Winamax():
 
     def get_matches(self, sport_id=None):
         res = []
-        sport_id=int(sport_id)
         for key, match in self.data["matches"].items():
             if not sport_id or sport_id == match["sportId"]:
                 res.append(self.get_match(match["matchId"]))
         return res
 
-    def get_sport(self, sport_id):
-        sport = self.get_thing("sports", sport_id)
-        if sport:
-            sport["sportId"] = sport_id
-            del sport["categories"]
-            del sport["filters"]
-            del sport["liveMatchCount"]
-            del sport["mainMatchCount"]
-            del sport["tvMatchCount"]
-        return sport
 
     def get_sports(self):
         res = []
@@ -105,5 +102,35 @@ class Winamax():
             res.append(self.get_sport(sport_id))
         return res
 
+    def get_outcomes(self):
+        res = []
+        print(self.data["outcomes"])
+        for outcome_id, outcome in self.data["outcomes"].items():
+            res.append(self.get_outcome(outcome_id))
+        return res
 
 
+    def take_outcomes_snapshot(self):
+        self.update_cache()
+        time = datetime.now().timestamp()
+        with self.Session() as session:
+            for outcome in self.get_outcomes():
+                history = db.History(
+                outcome_id=outcome["outcomeId"],
+                time=time,
+                data=json.dumps(outcome))
+                session.add(history)
+
+    def get_outcome_history(self, outcome_id):
+        with self.Session() as session:
+            history = session.query(db.History).filter_by(outcome_id=outcome_id)
+            return self.serialize_all(history.all())
+            
+    def serialize(self, history):
+        return {
+            "time": history.time,
+            "data": json.loads(history.data),
+        }
+
+    def serialize_all(self, history):
+        return [ self.serialize(h) for h in history ]

@@ -4,3 +4,5 @@ storage
 *.egg-info
 *.sublime*
 cache.json
+db.sqlite
+web
