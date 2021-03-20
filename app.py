@@ -16,9 +16,9 @@ def get_sports():
     return jsonify(winamax.get_sports())
 
 # matches
-@app.route('/sports/<int:sport_id>/matches')
-def get_matches(sport_id=None):
-    return jsonify(winamax.get_matches(sport_id=sport_id))
+@app.route('/tournaments/<int:tournament_id>/matches')
+def get_matches(tournament_id):
+    return jsonify(winamax.get_matches(tournament_id=tournament_id))
 
 # match
 @app.route('/matches/<int:match_id>')

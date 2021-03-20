@@ -26,8 +26,8 @@ export default {
   },
   methods: {
     async load() {
-      if (this.sport_id) {
-        this.matches = await this.get(`/sports/${this.sport_id}/matches`);
+      if (this.tournament_id) {
+        this.matches = await this.get(`/tournaments/${this.tournament_id}/matches`);
       }
     },
     to(match) {

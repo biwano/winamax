@@ -35,8 +35,12 @@ class Http():
             self._data = self.get_remote_data()
         return self._data
 
-    def get(self, type, id):
-        return self.data[type][str(id)]
+    def get(self, type, _id):
+        _id = str(_id)
+        if _id in self.data[type]:
+            return self.data[type][_id]
+        else:
+            return None
 
     """
     @property

@@ -1,9 +1,26 @@
 <template>
   <div>
       <h6>Sports</h6>
-      <ul v-for="sport in sports" :key="sport.sportId" class="nav nav-pills flex-column">
-        <li class="nav-item">
-          <router-link :to="to(sport)" class="nav-link" :class="clazz(sport)">{{sport.sportName}}</router-link>
+      <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
+        <!-- Sport -->
+        <li class="list-group-item clickable" @click="open(sport, $event)">
+          {{sport.name}}
+          <!-- Category -->
+          <div v-if="sport.ui_open == true">
+            <ul v-for="category in sport.categories" :key="category.categoryId" class="list-group">
+              <li class="list-group-item clickable" @click="open(category, $event)">
+                {{category.name}}
+                <!-- Tournament -->
+                <div v-if="category.ui_open == true">
+                  <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
+                    <li class="list-group-item clickable" @click="open(tournament, $event)">
+                       <router-link :to="to(tournament)">{{tournament.name}}</router-link>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
         </li>
       </ul>
   </div>
@@ -26,13 +43,25 @@ export default {
     async load() {
       this.sports = await this.get("/sports");
     },
-    to(sport) {
-      return {name: 'Sport', params: {sport_id: sport.sportId}}
-    },
     clazz(sport) {
       var res = {}
       if (sport.sportId == this.sport_id) res["active"] = true;
       return res;
+    },
+    open(thing, event) {
+      thing.ui_open = thing.ui_open == true ? false: true;
+      this.sports = Object.assign({}, this.sports);
+      event.stopPropagation();
+    },
+    to(tournament) {
+      return { 
+        name: "Tournament", 
+        params: {
+          sport_id: tournament["sportId"],
+          category_id: tournament["categoryId"],
+          tournament_id: tournament["tournamentId"]
+        }
+      };
     }
 
   },

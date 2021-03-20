@@ -15,15 +15,20 @@ class Cli:
         self.args = args
         self.winamax = Winamax()
 
-    def update_cache(self, **kwargs):
-        cache = args.type
-        self.winamax.update_cache()
+    def update_sports(self, **kwargs):
+        self.winamax.update_sports()
 
+    def update_next_tournament(self, **kwargs):
+        self.winamax.update_next_tournament()
+
+    """
     def take_outcomes_snapshot(self, **kwargs):
         self.winamax.take_outcomes_snapshot()
 
     def clean_outcome_history(self, **kwargs):
         self.winamax.clean_outcome_history()
+    """
+
 
 
 cli = Cli(args)

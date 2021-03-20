@@ -99,6 +99,7 @@ def update_match(match):
             session.add(db_match)
         db_match.value = json.dumps(match)
 
+
 def historize_outcome(outcome):
     time = datetime.now().timestamp()
     with Session()() as session:

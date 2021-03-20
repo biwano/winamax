@@ -11,12 +11,12 @@ const routes = [
     component: Home
   },
   {
-    path: '/:sport_id',
-    name: 'Sport',
+    path: '/:sport_id/:category_id/:tournament_id',
+    name: 'Tournament',
     component: Home
   },
   {
-    path: '/:sport_id/:match_id',
+    path: '/:sport_id/:category_id/:tournament_id/:match_id',
     name: 'Match',
     component: Home
   },

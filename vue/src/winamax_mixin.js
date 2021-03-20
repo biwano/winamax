@@ -11,6 +11,12 @@ export default {
       sport_id() {
         return parseInt(this.$route.params.sport_id);
       },
+      tournament_id() {
+        return parseInt(this.$route.params.tournament_id);
+      },
+      categorty_id() {
+        return parseInt(this.$route.params.categorty_id);
+      },
       match_id() {
         return parseInt(this.$route.params.match_id);
       },
