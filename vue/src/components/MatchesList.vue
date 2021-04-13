@@ -1,9 +1,10 @@
 <template>
   <div>
     <h6>Matches</h6>
-      <ul v-for="match in matches" :key="match.matchId" class="nav nav-pills flex-column">
-        <li class="nav-item">
-          <router-link :to="to(match)" class="nav-link" :class="clazz(match)">{{ match.competitor1Name}} - {{ match.competitor2Name}}</router-link>
+      <ul  class="nav nav-pills flex-column">
+        <li v-for="match in matches" :key="match.matchId" class="nav-item">
+          <router-link 
+          :to="to(match)" class="nav-link" :class="clazz(match)">{{ label(match) }} </router-link>
         </li>
       </ul>
   </div>
@@ -33,9 +34,13 @@ export default {
     to(match) {
       return {name: 'Match', params: {sport_id: this.sport_id, match_id: match.matchId}}
     },
+    label(match) {
+      return `${match.competitor1Name} ${match.competitor2Name} `
+    },
     clazz(match) {
       var res = {}
       if (match.matchId == this.match_id) res["active"] = true;
+      if (match.mainBetId === null) res["disabled"] = true;
       return res;
     }
 

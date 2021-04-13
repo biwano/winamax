@@ -25,6 +25,11 @@ def get_matches(tournament_id):
 def get_match(match_id=None):
     return jsonify(winamax.get_match(match_id=match_id))
 
+# match
+@app.route('/matches/<int:match_id>/send_mail', methods=["POST"])
+def send_match_notification(match_id=None):
+    return jsonify(winamax.send_match_notification(match_id=match_id))
+
 # outcome
 @app.route('/outcomes/<int:outcome_id>')
 def get_outcome(outcome_id=None):

@@ -8,6 +8,8 @@ import copy
 from . import db
 from .http import Http
 import time
+from . import utils
+from . import config
 
 
 class Winamax():
@@ -42,6 +44,10 @@ class Winamax():
         db.update_config("sports", res_sports)
         db.update_config("tournaments", res_tournaments)
 
+    def suffix_explode(self, suffix):
+        tmp = suffix.split("/")
+        print(tmp)
+        return (tmp[0], tmp[1], tmp[2])
     def get_sports(self):
         return db.get_config("sports")
 
@@ -57,11 +63,13 @@ class Winamax():
             last_updated_tournament = 0
         suffix = tournaments[last_updated_tournament]["suffix"]
         print(suffix)
-        self.update_tournament(suffix)
+        (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
+        self.update_tournament(sport_id, category_id, tournament_id)
         db.update_config("last_updated_tournament", { "value": last_updated_tournament})
         
         
-    def update_tournament(self, suffix):
+    def update_tournament(self, sport_id, category_id, tournament_id):
+        suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
         http = Http(suffix)
         for match_id in http.data["matches"]:
             match = http.data["matches"][match_id]
@@ -74,6 +82,18 @@ class Winamax():
                     outcome["outcomeId"] = outcome_id
                     outcome["odds"] = http.get("odds", outcome_id)
                     db.historize_outcome(outcome)
+
+        # Delete expired matches and outcomes
+        db_matches = self.get_matches(tournament_id)
+        for match in db_matches:
+            match_id = match["matchId"]
+            if not http.exists("matches", match_id):
+                bet = http.get("bets", match_id)
+                if bet:
+                    for outcome_id in bet["outcomes"]:
+                        db.delete_outcome_history(outcome_id)
+                db.delete_match(match_id)
+
 
     def get_matches(self, tournament_id):
         with self.Session() as session:
@@ -104,7 +124,20 @@ class Winamax():
             "data": json.loads(history.data),
         }
 
-    """
+    def get_logs(self, nb_lines=50):
+        logs = utils.get_last_n_lines('db.log', nb_lines)
+        return logs
+
+    def send_match_notification(self, match_id):
+        match=self.get_match(match_id)
+        subject = f"{match['competitor1Id'] - match['competitor2Id']}"
+        message = f"""J'ai un tips pour toi<br/>
+        Clique ici:<br/>
+        <a href='{config.endpoint}/#/{match['sportId']}/{match['categoryId']}/{match['tournamentId']}/{match['matchId']}'
+        """
+        utils.send_mail(subject, message)
+        return { "result": "ok"}
+
     def update_sport_cache(self, cache, sport_id):
         cache = Cache(f"/{sport_id}")
         print(json.dumps(cache.data["categories"], indent=4))
@@ -153,4 +186,3 @@ class Winamax():
         return res            
             
 
-    """

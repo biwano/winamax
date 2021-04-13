@@ -1,6 +1,7 @@
 #!venv/bin/python
 import argparse
 from winamax import Winamax
+from winamax import utils
 import json
 
 parser = argparse.ArgumentParser()
@@ -20,6 +21,14 @@ class Cli:
 
     def update_next_tournament(self, **kwargs):
         self.winamax.update_next_tournament()
+
+    def send_mail(self):
+        utils.send_mail("coucou", 
+            """
+            Coucou
+
+            Hello lala
+        """)
 
     """
     def take_outcomes_snapshot(self, **kwargs):

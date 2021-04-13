@@ -35,6 +35,10 @@ class Http():
             self._data = self.get_remote_data()
         return self._data
 
+    def exists(self, type, _id):
+        _id = str(_id)
+        return _id in self.data[type]
+
     def get(self, type, _id):
         _id = str(_id)
         if _id in self.data[type]:

@@ -5,7 +5,10 @@ export default {
 	methods: {
 		get(path) {
 			return axios.get(`${config.endpoint}${path}`).then((response) => response.data);
-		}
+		},
+    post(path) {
+      return axios.post(`${config.endpoint}${path}`).then((response) => response.data);
+    }
 	},
 	computed: {
       sport_id() {

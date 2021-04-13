@@ -6,3 +6,5 @@ storage
 cache.json
 db.sqlite
 web
+config.py
+db.log
