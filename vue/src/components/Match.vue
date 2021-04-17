@@ -8,9 +8,16 @@
         <h6>{{ match.competitor1Name }} - {{ match.competitor2Name }}</h6>
         {{ date(match.matchStart) }}
       </div>
+      <ul class="nav nav-pills">
+        <li v-for="s in scales" :key="s.value" class="nav-item" 
+          @click="scale = s" 
+          >
+          <a class="nav-link" href="javascript:;" :class="{active: s.value==scale.value}">{{s.label}}</a>
+        </li>
+      </ul>
       <div v-for="outcome in match.bet.outcomes" :key="outcome">
         <hr/>
-        <outcome  :outcome-id="outcome" ></outcome>
+        <outcome  :outcome-id="outcome" :scale="scale"></outcome>
       </div>
   </div>
   </div>
@@ -20,13 +27,16 @@
 <script>
 import winamax_mixin from "@/winamax_mixin"
 import Outcome from "@/components/Outcome.vue"
+import { scales } from "@/components/Outcome.vue"
 export default {
   name: 'Match',
   mixins: [winamax_mixin],
   components: { Outcome },
   data() {
     return { 
-      match: []
+      match: [],
+      scales,
+      scale: scales["all"],
     }
   },
   watch : {

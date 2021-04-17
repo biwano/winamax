@@ -17,37 +17,73 @@ class Winamax():
         self._data = None
         self.Session = db.Session()
 
+    def get_thing(self, thing_list, thing_id):
+        if thing_list:
+            for t in thing_list:
+                if t.get("id") == thing_id:
+                    return t
+        return {}
+
+    def get_sport(self, sports, sport_id):
+        return self.get_thing(sports, sport_id)
+
+    def get_category(self, sports, sport_id, category_id):
+        return self.get_thing(self.get_sport(sports, sport_id).get("categories"), category_id)
+
+    def get_tournament(self, sports, sport_id, category_id, tournament_id):
+        return self.get_thing(self.get_category(sports, sport_id, category_id).get("tournaments"), tournament_id)
+
+    def update_sports_nb_matches(self,):
+        sports = self.get_sports()
+        for sport in sports:
+            sport["matches"] = 0
+            for category in sport["categories"]:
+                category["matches"] = 0
+                for tournament in category["tournaments"]:
+                    db_matches = self.get_matches(tournament["id"])
+                    tournament["matches"] = len(db_matches)
+                    category["matches"] += tournament["matches"]
+                sport["matches"] += category["matches"]
+        db.update_config("sports", sports)
+
     def update_sports(self):
         http = Http()
         res_sports = []
         res_tournaments = []
         for sport_id in http.data["sports"]:
             sport = http.get("sports", sport_id)
-            res_sport = { "name": sport["sportName"], "categories": []}
+            res_sport = { "id": sport_id, "name": sport["sportName"], "categories": []}
             for category_id in sport["categories"]:
                 category = http.get("categories", category_id)
-                res_category = {"name": category["categoryName"], "tournaments": []}
+                res_category = {"id": category_id, "name": category["categoryName"], "tournaments": []}
                 res_sport["categories"].append(res_category)
                 for tournament_id in category["tournaments"]:
                     tournament = http.get("tournaments", tournament_id)
-                    res_tournament = {"name": tournament["tournamentName"],
+                    res_tournament = {"id": tournament_id, "name": tournament["tournamentName"],
                     "suffix": f"{sport_id}/{category_id}/{tournament_id}",
                     "sportId": sport_id,
                     "categoryId": category_id,
                     "tournamentId": tournament_id,
                     }
+                    # Get old tournament compputed data
+                    old_tournament = self.get_tournament(self.get_sports(), sport_id, category_id, tournament_id)
+                    if old_tournament and "matches" in old_tournament:
+                        res_tournament["matches"] = old_tournament["matches"]
+                    else:
+                        res_tournament["matches"] = 0
                     res_category["tournaments"].append(res_tournament)
                     res_tournaments.append(res_tournament)
+
             res_sports.append(res_sport)
-            
 
         db.update_config("sports", res_sports)
         db.update_config("tournaments", res_tournaments)
+        self.update_sports_nb_matches()
 
     def suffix_explode(self, suffix):
         tmp = suffix.split("/")
-        print(tmp)
         return (tmp[0], tmp[1], tmp[2])
+
     def get_sports(self):
         return db.get_config("sports")
 
@@ -62,7 +98,7 @@ class Winamax():
         if last_updated_tournament >= len(tournaments):
             last_updated_tournament = 0
         suffix = tournaments[last_updated_tournament]["suffix"]
-        print(suffix)
+        
         (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
         self.update_tournament(sport_id, category_id, tournament_id)
         db.update_config("last_updated_tournament", { "value": last_updated_tournament})
@@ -71,8 +107,11 @@ class Winamax():
     def update_tournament(self, sport_id, category_id, tournament_id):
         suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
         http = Http(suffix)
+        nb_matches = 0
         for match_id in http.data["matches"]:
             match = http.data["matches"][match_id]
+            if match["tournamentId"] == tournament_id:
+                nb_matches += 1
             bet = http.get("bets", match["mainBetId"])
             match["bet"] = bet
             db.update_match(match)
@@ -93,6 +132,9 @@ class Winamax():
                     for outcome_id in bet["outcomes"]:
                         db.delete_outcome_history(outcome_id)
                 db.delete_match(match_id)
+
+        # update sports matches number
+        self.update_sports_nb_matches()
 
 
     def get_matches(self, tournament_id):
@@ -138,6 +180,7 @@ class Winamax():
         utils.send_mail(subject, message)
         return { "result": "ok"}
 
+    """
     def update_sport_cache(self, cache, sport_id):
         cache = Cache(f"/{sport_id}")
         print(json.dumps(cache.data["categories"], indent=4))
@@ -160,7 +203,6 @@ class Winamax():
                 self.update_cache(f"/{sport_id}/{category_id}")
                 for tournament_id in category["tournaments"]:
                     self.update_cache(f"/{sport_id}/{category_id}/{tournament_id}")
-                    
 
     def take_outcomes_snapshot(self):
         self.update_cache()
@@ -184,5 +226,6 @@ class Winamax():
                     session.query(db.History).filter_by(outcome_id=outcome_id).delete(synchronize_session=False)
                     res.append(outcome_id)
         return res            
-            
+           
+    """                
 

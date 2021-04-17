@@ -7,6 +7,9 @@ import json
 parser = argparse.ArgumentParser()
 parser.add_argument("action")
 parser.add_argument("--type", default=None)
+parser.add_argument("--sport_id", default=None)
+parser.add_argument("--category_id", default=None)
+parser.add_argument("--tournament_id", default=None)
 
 args = parser.parse_args()
 
@@ -21,6 +24,9 @@ class Cli:
 
     def update_next_tournament(self, **kwargs):
         self.winamax.update_next_tournament()
+
+    def update_tournament(self, **kwargs):
+        self.winamax.update_tournament(args.sport_id, args.category_id, args.tournament_id)
 
     def send_mail(self):
         utils.send_mail("coucou", 

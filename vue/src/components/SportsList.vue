@@ -3,18 +3,18 @@
       <h6>Sports</h6>
       <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
         <!-- Sport -->
-        <li class="list-group-item clickable" @click="open(sport, $event)">
-          {{sport.name}}
+        <li v-if="sport.matches>0" class="list-group-item clickable" @click="open(sport, $event)">
+          {{sport.name}} ({{sport.matches}})
           <!-- Category -->
           <div v-if="sport.ui_open == true">
             <ul v-for="category in sport.categories" :key="category.categoryId" class="list-group">
-              <li class="list-group-item clickable" @click="open(category, $event)">
-                {{category.name}}
+              <li v-if="category.matches>0" class="list-group-item clickable" @click="open(category, $event)">
+                {{category.name}} ({{category.matches}})
                 <!-- Tournament -->
                 <div v-if="category.ui_open == true">
                   <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
-                    <li class="list-group-item clickable" @click="open(tournament, $event)">
-                       <router-link :to="to(tournament)">{{tournament.name}}</router-link>
+                    <li v-if="tournament.matches>0" class="list-group-item clickable" @click="open(tournament, $event)">
+                       <router-link :to="to(tournament)">{{tournament.name}} ({{tournament.matches}})</router-link>
                     </li>
                   </ul>
                 </div>
