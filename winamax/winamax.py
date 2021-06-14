@@ -7,6 +7,7 @@ from http.cookiejar import LWPCookieJar
 import copy
 from . import db
 from .http import Http
+from .browser import Browser
 import time
 from . import utils
 from . import config
@@ -136,6 +137,12 @@ class Winamax():
         # update sports matches number
         self.update_sports_nb_matches()
 
+        # Check matches for opportunities
+        print(db_matches)
+        for match_id in http.data["matches"]:
+            if self.check_match(match_id):
+                winamax.send_match_notification(match_id=match_id)
+
 
     def get_matches(self, tournament_id):
         with self.Session() as session:
@@ -157,7 +164,8 @@ class Winamax():
 
     def get_outcome_history(self, outcome_id):
         with self.Session() as session:
-            histories = session.query(db.History).filter_by(outcome_id=outcome_id)
+            histories = session.query(db.History).filter_by(outcome_id=outcome_id).order_by(db.History.time)
+
             return [ self.serialize_history(h) for h in histories.all() ]
 
     def serialize_history(self, history):
@@ -179,6 +187,62 @@ class Winamax():
         """
         utils.send_mail(subject, message)
         return { "result": "ok"}
+
+    def update_tournament_new(self, sport_id, category_id, tournament_id):
+        suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
+        browser = Browser(suffix)
+        browser.get_remote_data()
+
+    def check_outcome(self, outcome_id):
+        print(f"Checking outcome {outcome_id}")
+        history = self.get_outcome_history(outcome_id)
+        last = None
+        first = None
+        history.reverse()
+        for dot in history:
+            if not last:
+                last = dot
+            first = dot
+            if last.get("time") - first.get("time") > 15 * 60:
+                break
+        if not first or not last:
+            print(f"- No data")
+            return False
+        first_odds = first.get("data").get("odds")
+        last_odds = last.get("data").get("odds")
+        if first_odds < 1 or first_odds > 2:
+            print(f"- Bad odds: {first_odds}")
+            return False
+
+        diff = (first_odds - last_odds) / first_odds
+        if abs(diff) < 0.05:
+            print(f"- Weak variation: {diff}")
+            return False            
+
+        return True
+            
+    def check_match(self, match_id):
+        match = self.get_match(match_id)
+        match_start = match.get("matchStart")
+        now = datetime.now()
+        timestamp = datetime.timestamp(now)
+        print(f"Checking match {match_id}")
+        if not match.get('bet') or not match.get('bet').get('outcomes'):
+            print(f" - no outcome")
+            return False
+        if match_start - timestamp < 60 * 10:
+            print(f" - too late")
+            return False
+        if match_start - timestamp > 60 * 30:
+            print(f" - too soon")
+            return False
+        for outcome_id in match.get('bet').get('outcomes'):
+            if self.check_outcome(outcome_id):
+                return True
+        return False
+            
+
+
 
     """
     def update_sport_cache(self, cache, sport_id):

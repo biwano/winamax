@@ -10,6 +10,7 @@ parser.add_argument("--type", default=None)
 parser.add_argument("--sport_id", default=None)
 parser.add_argument("--category_id", default=None)
 parser.add_argument("--tournament_id", default=None)
+parser.add_argument("--match_id", default=None)
 
 args = parser.parse_args()
 
@@ -27,6 +28,10 @@ class Cli:
 
     def update_tournament(self, **kwargs):
         self.winamax.update_tournament(args.sport_id, args.category_id, args.tournament_id)
+        #self.winamax.update_tournament_new(args.sport_id, args.category_id, args.tournament_id)
+
+    def check_match(self, **kwargs):
+        print(self.winamax.check_match(args.match_id))
 
     def send_mail(self):
         utils.send_mail("coucou", 

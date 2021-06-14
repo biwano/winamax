@@ -27,6 +27,7 @@ setuptools.setup(
         "sqlalchemy",
         "requests",
         "flask",
-        "flask_cors"
+        "flask_cors",
+        "selenium"
     ]
 )
