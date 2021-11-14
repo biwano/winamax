@@ -37,12 +37,11 @@ class Http():
                         try:
                             val = json.loads(val)
                         except Exception as e:
-                            print(f"Unparseasble {val}")
                             f = open("error.txt", "w")
                             f.write(val.decode('utf-8', errors='ignore'))
                             f.close()
                             raise(e)
-                            
+
                         if not val.get("matches"):
                             raise(Exception("Bad tournament type"))
                         res.update(val)

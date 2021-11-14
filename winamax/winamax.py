@@ -115,7 +115,7 @@ class Winamax():
         log(f"Rotating tournaments {last_updated_tournament}/{len(tournaments)}")
         db.update_config("last_updated_tournament", { "value": last_updated_tournament})
         self.update_tournament(sport_id, category_id, tournament_id)
-    
+
         
     def update_tournament(self, sport_id, category_id, tournament_id):
         log(f"Updating tournament {sport_id}/{category_id}/{tournament_id}")
@@ -251,7 +251,6 @@ class Winamax():
         match = self.get_match(match_id)
         match_start = match.get("matchStart")
         now = datetime.now()
-        #print(match)
         timestamp = datetime.timestamp(now)
         log(f"Checking match {self.matchInfo(match)}")
         if not match.get('bet') or not match.get('bet').get('outcomes'):
