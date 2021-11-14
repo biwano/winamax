@@ -13,7 +13,7 @@ def jsonify(data):
 # sports
 @app.route('/sports')
 def get_sports():
-    return jsonify(winamax.get_sports())
+    return jsonify(winamax.sports)
 
 # matches
 @app.route('/tournaments/<int:tournament_id>/matches')
