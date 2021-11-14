@@ -151,7 +151,7 @@ class Winamax():
 
         # Check matches for opportunities
         for match_id in http.data["matches"]:
-            if str(match["tournamentId"]) == str(tournament_id):
+            #if str(match["tournamentId"]) == str(tournament_id):
                 if self.check_match(match_id):
                     winamax.send_match_notification(match_id=match_id)
 
