@@ -22,26 +22,34 @@ class Winamax():
     def __init__(self):
         self._data = None
         self.Session = db.Session()
+        self.http = None
+        self._sports = None
+
+    @property
+    def sports(self):
+        if not self._sports:
+            self._sports = db.get_config("sports")
+        return self._sports
+    
 
     def get_thing(self, thing_list, thing_id):
         if thing_list:
             for t in thing_list:
-                if t.get("id") == thing_id:
+                if str(t.get("id")) == str(thing_id):
                     return t
         return {}
 
-    def get_sport(self, sports, sport_id):
-        return self.get_thing(sports, sport_id)
+    def get_sport(self, sport_id):
+        return self.get_thing(self.sports, sport_id)
 
-    def get_category(self, sports, sport_id, category_id):
-        return self.get_thing(self.get_sport(sports, sport_id).get("categories"), category_id)
+    def get_category(self, sport_id, category_id):
+        return self.get_thing(self.get_sport(sport_id).get("categories"), category_id)
 
-    def get_tournament(self, sports, sport_id, category_id, tournament_id):
-        return self.get_thing(self.get_category(sports, sport_id, category_id).get("tournaments"), tournament_id)
+    def get_tournament(self, sport_id, category_id, tournament_id):
+        return self.get_thing(self.get_category(sport_id, category_id).get("tournaments"), tournament_id)
 
-    def update_sports_nb_matches(self,):
-        sports = self.get_sports()
-        for sport in sports:
+    def update_sports_nb_matches(self):
+        for sport in self.sports:
             sport["matches"] = 0
             for category in sport["categories"]:
                 category["matches"] = 0
@@ -50,10 +58,11 @@ class Winamax():
                     tournament["matches"] = len(db_matches)
                     category["matches"] += tournament["matches"]
                 sport["matches"] += category["matches"]
-        db.update_config("sports", sports)
+        db.update_config("sports", self.sports)
 
     def update_sports(self):
         http = Http()
+        self.http = http;
         res_sports = []
         res_tournaments = []
         for sport_id in http.data["sports"]:
@@ -71,8 +80,8 @@ class Winamax():
                     "categoryId": category_id,
                     "tournamentId": tournament_id,
                     }
-                    # Get old tournament compputed data
-                    old_tournament = self.get_tournament(self.get_sports(), sport_id, category_id, tournament_id)
+                    # Get old tournament computed data
+                    old_tournament = self.get_tournament(sport_id, category_id, tournament_id)
                     if old_tournament and "matches" in old_tournament:
                         res_tournament["matches"] = old_tournament["matches"]
                     else:
@@ -88,10 +97,7 @@ class Winamax():
 
     def suffix_explode(self, suffix):
         tmp = suffix.split("/")
-        return (int(tmp[0]), int(tmp[1]), int(tmp[2]))
-
-    def get_sports(self):
-        return db.get_config("sports")
+        return (tmp[0], tmp[1], tmp[2])
 
     def update_next_tournament(self):
         last_updated_tournament = db.get_config("last_updated_tournament")
@@ -115,11 +121,9 @@ class Winamax():
         log(f"Updating tournament {sport_id}/{category_id}/{tournament_id}")
         suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
         http = Http(suffix)
-        nb_matches = 0
+        self.http = http;
         for match_id in http.data["matches"]:
             match = http.data["matches"][match_id]
-            if match["tournamentId"] == tournament_id:
-                nb_matches += 1
             bet = http.get("bets", match["mainBetId"])
             match["bet"] = bet
             db.update_match(match)
@@ -147,7 +151,7 @@ class Winamax():
 
         # Check matches for opportunities
         for match_id in http.data["matches"]:
-            if match["tournamentId"] == tournament_id:
+            if str(match["tournamentId"]) == str(tournament_id):
                 if self.check_match(match_id):
                     winamax.send_match_notification(match_id=match_id)
 
@@ -228,13 +232,28 @@ class Winamax():
             return False            
 
         return True
-            
+    
+    def matchInfo(self, match):
+        res = ""
+        def add(t):
+            nonlocal res
+            if res:
+                res = res + "/"
+            if t: 
+                res = res + t["name"]
+        add(self.get_sport(match['sportId']))
+        add(self.get_category(match['sportId'], match['categoryId']))
+        add(self.get_tournament(match['sportId'], match['categoryId'], match['tournamentId']))
+        res = f'{res} - {match["competitor1Name"]} - {match["competitor2Name"]}'
+        return res
+
     def check_match(self, match_id):
         match = self.get_match(match_id)
         match_start = match.get("matchStart")
         now = datetime.now()
+        #print(match)
         timestamp = datetime.timestamp(now)
-        log(f"Checking match {match_id}")
+        log(f"Checking match {self.matchInfo(match)}")
         if not match.get('bet') or not match.get('bet').get('outcomes'):
             log(f" - no outcome")
             return False

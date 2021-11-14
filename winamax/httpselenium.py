@@ -38,9 +38,12 @@ class Http():
                             val = json.loads(val)
                         except Exception as e:
                             print(f"Unparseasble {val}")
+                            f = open("error.txt", "w")
+                            f.write(val.decode('utf-8', errors='ignore'))
+                            f.close()
                             raise(e)
                         res.update(val)
-                        break
+                        
         except Exception as e:
             raise(e)
         finally:
