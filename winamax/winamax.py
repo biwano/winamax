@@ -6,7 +6,7 @@ from datetime import datetime
 from http.cookiejar import LWPCookieJar
 import copy
 from . import db
-from .http import Http
+from .httpselenium import Http
 from .browser import Browser
 import time
 from . import utils
@@ -119,9 +119,10 @@ class Winamax():
             if bet:
                 for outcome_id in bet["outcomes"]:
                     outcome = http.get("outcomes", outcome_id)
-                    outcome["outcomeId"] = outcome_id
-                    outcome["odds"] = http.get("odds", outcome_id)
-                    db.historize_outcome(outcome)
+                    if outcome:
+                        outcome["outcomeId"] = outcome_id
+                        outcome["odds"] = http.get("odds", outcome_id)
+                        db.historize_outcome(outcome)
 
         # Delete expired matches and outcomes
         db_matches = self.get_matches(tournament_id)
@@ -138,10 +139,10 @@ class Winamax():
         self.update_sports_nb_matches()
 
         # Check matches for opportunities
-        print(db_matches)
         for match_id in http.data["matches"]:
-            if self.check_match(match_id):
-                winamax.send_match_notification(match_id=match_id)
+            if match["tournamentId"] == tournament_id:
+                if self.check_match(match_id):
+                    winamax.send_match_notification(match_id=match_id)
 
 
     def get_matches(self, tournament_id):
@@ -240,56 +241,7 @@ class Winamax():
             if self.check_outcome(outcome_id):
                 return True
         return False
-            
-
-
-
-    """
-    def update_sport_cache(self, cache, sport_id):
-        cache = Cache(f"/{sport_id}")
-        print(json.dumps(cache.data["categories"], indent=4))
-        for category_id in cache.data["categories"]:
-            break
-
-    def update_cache(self, suffix):
-        print(f"Updating cache {suffix}")
-        local_cache = Cache(suffix)
-        local_cache.update_cache()
-        time.sleep(5)
-
-    def update_all_caches(self):
-        suffix = ""
-        cache = Cache(suffix)
-        for sport_id, sport in cache.data["sports"].items():
-            self.update_cache(f"/{sport_id}")
-            for category_id in sport["categories"]:
-                category = cache.get_category(category_id)
-                self.update_cache(f"/{sport_id}/{category_id}")
-                for tournament_id in category["tournaments"]:
-                    self.update_cache(f"/{sport_id}/{category_id}/{tournament_id}")
-
-    def take_outcomes_snapshot(self):
-        self.update_cache()
-        time = datetime.now().timestamp()
-        with self.Session() as session:
-            for outcome in self.get_outcomes():
-                history = db.History(
-                outcome_id=outcome["outcomeId"],
-                time=time,
-                data=json.dumps(outcome))
-                session.add(history)
-
-
-
-    def clean_outcome_history(self):
-        res = []
-        with self.Session() as session:
-            history = session.query(db.History.outcome_id).distinct()
-            for outcome_id, in history:
-                if not self.get_outcome(outcome_id):
-                    session.query(db.History).filter_by(outcome_id=outcome_id).delete(synchronize_session=False)
-                    res.append(outcome_id)
-        return res            
-           
-    """                
-
+    
+    def test(self):
+        http = Http("/1/44/207")
+        http.get_remote_data()

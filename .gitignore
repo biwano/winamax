@@ -7,4 +7,6 @@ cache.json
 db.sqlite
 web
 config.py
-db.log
+*.log
+*.old
+output

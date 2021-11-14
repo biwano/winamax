@@ -41,6 +41,9 @@ class Cli:
             Hello lala
         """)
 
+    def test(self, **kwargs):
+        self.winamax.test()
+
     """
     def take_outcomes_snapshot(self, **kwargs):
         self.winamax.take_outcomes_snapshot()

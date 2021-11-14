@@ -28,6 +28,7 @@ setuptools.setup(
         "requests",
         "flask",
         "flask_cors",
-        "selenium"
+        "webdriver-manager",
+        "selenium-wire"
     ]
 )
