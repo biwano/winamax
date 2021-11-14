@@ -106,6 +106,7 @@ class Winamax():
         suffix = tournaments[last_updated_tournament]["suffix"]
         
         (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
+        log(f"Rotating tournaments {last_updated_tournament}/{len(tournaments)}")
         self.update_tournament(sport_id, category_id, tournament_id)
         db.update_config("last_updated_tournament", { "value": last_updated_tournament})
         
