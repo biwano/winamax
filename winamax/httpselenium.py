@@ -52,7 +52,6 @@ class Http():
             raise(e)
         finally:
             driver.quit()
-        print(res)
 
         return res
 
