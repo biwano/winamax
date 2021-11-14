@@ -11,7 +11,12 @@ from .browser import Browser
 import time
 from . import utils
 from . import config
+from datetime import datetime
 
+def log(text):
+    now = datetime.now() # current date and time
+    date = now.strftime("%m/%d/%Y %H:%M:%S")
+    print(f"[{date}] {text}")
 
 class Winamax():
     def __init__(self):
@@ -83,7 +88,7 @@ class Winamax():
 
     def suffix_explode(self, suffix):
         tmp = suffix.split("/")
-        return (tmp[0], tmp[1], tmp[2])
+        return (int(tmp[0]), int(tmp[1]), int(tmp[2]))
 
     def get_sports(self):
         return db.get_config("sports")
@@ -106,6 +111,7 @@ class Winamax():
         
         
     def update_tournament(self, sport_id, category_id, tournament_id):
+        log(f"Updating tournament {sport_id}/{category_id}/{tournament_id}")
         suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
         http = Http(suffix)
         nb_matches = 0
@@ -195,7 +201,7 @@ class Winamax():
         browser.get_remote_data()
 
     def check_outcome(self, outcome_id):
-        print(f"Checking outcome {outcome_id}")
+        log(f"Checking outcome {outcome_id}")
         history = self.get_outcome_history(outcome_id)
         last = None
         first = None
@@ -207,17 +213,17 @@ class Winamax():
             if last.get("time") - first.get("time") > 15 * 60:
                 break
         if not first or not last:
-            print(f"- No data")
+            log(f"- No data")
             return False
         first_odds = first.get("data").get("odds")
         last_odds = last.get("data").get("odds")
         if first_odds < 1 or first_odds > 2:
-            print(f"- Bad odds: {first_odds}")
+            log(f"- Bad odds: {first_odds}")
             return False
 
         diff = (first_odds - last_odds) / first_odds
         if abs(diff) < 0.05:
-            print(f"- Weak variation: {diff}")
+            log(f"- Weak variation: {diff}")
             return False            
 
         return True
@@ -227,15 +233,15 @@ class Winamax():
         match_start = match.get("matchStart")
         now = datetime.now()
         timestamp = datetime.timestamp(now)
-        print(f"Checking match {match_id}")
+        log(f"Checking match {match_id}")
         if not match.get('bet') or not match.get('bet').get('outcomes'):
-            print(f" - no outcome")
+            log(f" - no outcome")
             return False
         if match_start - timestamp < 60 * 10:
-            print(f" - too late")
+            log(f" - too late")
             return False
         if match_start - timestamp > 60 * 30:
-            print(f" - too soon")
+            log(f" - too soon")
             return False
         for outcome_id in match.get('bet').get('outcomes'):
             if self.check_outcome(outcome_id):

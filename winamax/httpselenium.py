@@ -31,10 +31,15 @@ class Http():
                     m = p.search(body)
                     if m:
                         val = m.group(1)
-                        res.update(json.loads(val))
+                        try:
+                            val = json.loads(val)
+                        except Exception as e:
+                            print(f"Unparseasble {val}")
+                            raise(e)
+                        res.update(val)
                         break
         except Exception as e:
-            throw(e)
+            raise(e)
         finally:
             driver.quit()
 
