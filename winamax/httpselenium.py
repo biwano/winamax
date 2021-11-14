@@ -42,12 +42,18 @@ class Http():
                             f.write(val.decode('utf-8', errors='ignore'))
                             f.close()
                             raise(e)
+                            
+                        if not val.get("matches"):
+                            raise(Exception("Bad tournament type"))
                         res.update(val)
+                        break
+                        
                         
         except Exception as e:
             raise(e)
         finally:
             driver.quit()
+        print(res)
 
         return res
 
