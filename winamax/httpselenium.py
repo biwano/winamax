@@ -4,6 +4,8 @@ import json
 from seleniumwire import webdriver
 from seleniumwire.utils import decode
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+
 from . import db
 
 class Http():
@@ -13,30 +15,29 @@ class Http():
         self.suffix = suffix
 
     def get_remote_data(self):
-        chrome_options = webdriver.ChromeOptions()
-        prefs = {"profile.managed_default_content_settings.images": 2}
-        chrome_options.add_experimental_option("prefs", prefs)
-        driver = webdriver.Chrome(ChromeDriverManager().install())
-        # Go to the Google home page
-        driver.get(f"https://www.winamax.fr/paris-sportifs/sports{self.suffix}")
-        p = re.compile(b'\["m",(\{.*\})\]')
-
-        # Access requests via the `requests` attribute
         res = {}
-        for request in driver.requests:
-            if request.response and "EIO" in request.url:
-                body = decode(request.response.body, request.response.headers.get('Content-Encoding', 'identity'))
-                m = p.search(body)
-                if m:
-                    val = m.group(1)
-                    print(self.suffix)
-                    print(val)
-                    res.update(json.loads(val))
-                    break
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        try:
+            # Go to the Google home page
+            driver.get(f"https://www.winamax.fr/paris-sportifs/sports{self.suffix}")
+            p = re.compile(b'\["m",(\{.*\})\]')
 
-        
-        #print(json.dumps(res, indent=2))
-        driver.quit()
+            # Access requests via the `requests` attribute
+            for request in driver.requests:
+                if request.response and "EIO" in request.url:
+                    body = decode(request.response.body, request.response.headers.get('Content-Encoding', 'identity'))
+                    m = p.search(body)
+                    if m:
+                        val = m.group(1)
+                        res.update(json.loads(val))
+                        break
+        except Exception as e:
+            throw(e)
+        finally:
+            driver.quit()
+
         return res
 
 
