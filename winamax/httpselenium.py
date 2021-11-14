@@ -1,12 +1,15 @@
 import requests
 import re
 import json
+import os
 from seleniumwire import webdriver
 from seleniumwire.utils import decode
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
 from . import db
+
+os.environ['WDM_LOG_LEVEL'] = '0'
 
 class Http():
     def __init__(self, suffix=""):
