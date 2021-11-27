@@ -42,12 +42,10 @@ class Http():
                             f.close()
                             raise(e)
 
-                        if not val.get("matches"):
-                            raise(Exception("Bad tournament type"))
+                        #if not val.get("matches"):
+                        #    print(json.dumps(val, indent=2))
+                        #    raise(Exception("Bad tournament type"))
                         res.update(val)
-                        break
-                        
-                        
         except Exception as e:
             raise(e)
         finally:

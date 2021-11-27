@@ -28,7 +28,6 @@ class Cli:
 
     def update_tournament(self, **kwargs):
         self.winamax.update_tournament(args.sport_id, args.category_id, args.tournament_id)
-        #self.winamax.update_tournament_new(args.sport_id, args.category_id, args.tournament_id)
 
     def check_match(self, **kwargs):
         print(self.winamax.check_match(args.match_id))

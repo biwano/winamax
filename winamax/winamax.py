@@ -7,6 +7,7 @@ from http.cookiejar import LWPCookieJar
 import copy
 from . import db
 from .httpselenium import Http
+from .http import Http as HttpStatic
 from .browser import Browser
 import time
 from . import utils
@@ -22,7 +23,6 @@ class Winamax():
     def __init__(self):
         self._data = None
         self.Session = db.Session()
-        self.http = None
         self._sports = None
 
     @property
@@ -62,7 +62,6 @@ class Winamax():
 
     def update_sports(self):
         http = Http()
-        self.http = http;
         res_sports = []
         res_tournaments = []
         for sport_id in http.data["sports"]:
@@ -114,14 +113,14 @@ class Winamax():
         (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
         log(f"Rotating tournaments {last_updated_tournament}/{len(tournaments)}")
         db.update_config("last_updated_tournament", { "value": last_updated_tournament})
-        self.update_tournament(sport_id, category_id, tournament_id)
+        http = Http(suffix)
+        self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
+        self.update_tournament(HttpStatic(suffix), sport_id, category_id, tournament_id)
 
         
-    def update_tournament(self, sport_id, category_id, tournament_id):
+    def update_tournament(self, http, sport_id, category_id, tournament_id):
         log(f"Updating tournament {sport_id}/{category_id}/{tournament_id}")
         suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
-        http = Http(suffix)
-        self.http = http;
         for match_id in http.data["matches"]:
             match = http.data["matches"][match_id]
             bet = http.get("bets", match["mainBetId"])
@@ -153,8 +152,7 @@ class Winamax():
         for match_id in http.data["matches"]:
             #if str(match["tournamentId"]) == str(tournament_id):
                 if self.check_match(match_id):
-                    winamax.send_match_notification(match_id=match_id)
-
+                    self.send_match_notification(match_id=match_id)
 
     def get_matches(self, tournament_id):
         with self.Session() as session:
@@ -199,11 +197,6 @@ class Winamax():
         """
         utils.send_mail(subject, message)
         return { "result": "ok"}
-
-    def update_tournament_new(self, sport_id, category_id, tournament_id):
-        suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
-        browser = Browser(suffix)
-        browser.get_remote_data()
 
     def check_outcome(self, outcome_id):
         log(f"Checking outcome {outcome_id}")

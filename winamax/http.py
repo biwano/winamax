@@ -10,7 +10,7 @@ class Http():
         self.suffix = suffix
 
     def extract(self, text):
-        p= re.compile('var PRELOADED_STATE = (\{((?!\<script).)*});')
+        p = re.compile('var PRELOADED_STATE = (\{((?!\<script).)*});')
         m = p.search(text)
         if m:
             res = json.loads(m.group(1))
