@@ -121,7 +121,11 @@ class Winamax():
     def update_tournament(self, http, sport_id, category_id, tournament_id):
         log(f"Updating tournament {sport_id}/{category_id}/{tournament_id}")
         suffix = f"/{sport_id}/{category_id}/{tournament_id}/"
-        for match_id in http.data["matches"]:
+        if not http.data.get("matches"):
+            log(f"Bad data")
+            return
+            
+        for match_id in http.data.get("matches"):
             match = http.data["matches"][match_id]
             bet = http.get("bets", match["mainBetId"])
             match["bet"] = bet
