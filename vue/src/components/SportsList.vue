@@ -3,18 +3,22 @@
       <h6>Sports</h6>
       <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
         <!-- Sport -->
-        <li v-if="sport.matches>0" class="list-group-item clickable" @click="open(sport, $event)">
+        <li v-show="sport.matches>0" class="list-group-item clickable" @click="open(sport, $event)">
           {{sport.name}} ({{sport.matches}})
           <!-- Category -->
-          <div v-if="sport.ui_open == true">
+          <div v-show="sport.ui_open == true">
             <ul v-for="category in sport.categories" :key="category.categoryId" class="list-group">
-              <li v-if="category.matches>0" class="list-group-item clickable" @click="open(category, $event)">
+              <li v-show="category.matches>0" class="list-group-item clickable" @click="open(category, $event)">
                 {{category.name}} ({{category.matches}})
                 <!-- Tournament -->
-                <div v-if="category.ui_open == true">
+                <div v-show="category.ui_open == true" @click.stop="">
                   <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
-                    <li v-if="tournament.matches>0" class="list-group-item clickable" @click="open(tournament, $event)">
+                    <li v-show="tournament.matches>0" class="list-group-item clickable">
+                       <input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>
+
                        <router-link :to="to(tournament)">{{tournament.name}} ({{tournament.matches}})</router-link>
+
+
                     </li>
                   </ul>
                 </div>
@@ -42,6 +46,20 @@ export default {
   methods: {
     async load() {
       this.sports = await this.get("/sports");
+      this.auto_open()
+    },
+    auto_open() {
+      for (let sport of this.sports) {
+        if (sport.id == this.sport_id) {
+          sport.ui_open = true;
+          for (let category of sport.categories) {
+            if (category.id == this.category_id) {
+              category.ui_open = true;
+            }
+          }
+        }
+      }
+      this.sports = [...this.sports.slice()]
     },
     clazz(sport) {
       var res = {}
@@ -53,13 +71,17 @@ export default {
       this.sports = Object.assign({}, this.sports);
       event.stopPropagation();
     },
+    switch_favorite(tournament) {
+      this.post(`/tournaments/${tournament.sportId}/${tournament.categoryId}/${tournament.tournamentId}`, 
+        { favorite: !tournament.favorite});
+    },
     to(tournament) {
       return { 
         name: "Tournament", 
         params: {
-          sport_id: tournament["sportId"],
-          category_id: tournament["categoryId"],
-          tournament_id: tournament["tournamentId"]
+          sport_id: tournament.sportId,
+          category_id: tournament.categoryId,
+          tournament_id: tournament.tournamentId
         }
       };
     }

@@ -6,8 +6,8 @@ export default {
 		get(path) {
 			return axios.get(`${config.endpoint}${path}`).then((response) => response.data);
 		},
-    post(path) {
-      return axios.post(`${config.endpoint}${path}`).then((response) => response.data);
+    post(path, data) {
+      return axios.post(`${config.endpoint}${path}`, data).then((response) => response.data);
     }
 	},
 	computed: {

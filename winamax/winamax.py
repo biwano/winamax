@@ -60,8 +60,17 @@ class Winamax():
                 sport["matches"] += category["matches"]
         db.update_config("sports", self.sports)
 
+    def update_tournament_config(self, sport_id, category_id, tournament_id, value):
+        tournament = self.get_tournament(sport_id, category_id,tournament_id)
+        tournament.update(value)
+        db.update_config("sports", self.sports)
+        return True
+
+
+
+
     def update_sports(self):
-        http = Http()
+        http = HttpStatic()
         res_sports = []
         res_tournaments = []
         for sport_id in http.data["sports"]:
@@ -85,6 +94,12 @@ class Winamax():
                         res_tournament["matches"] = old_tournament["matches"]
                     else:
                         res_tournament["matches"] = 0
+
+                    if old_tournament and "favorite" in old_tournament:
+                        res_tournament["favorite"] = old_tournament["favorite"]
+                    else:
+                        res_tournament["favorite"] = False
+
                     res_category["tournaments"].append(res_tournament)
                     res_tournaments.append(res_tournament)
 
@@ -105,17 +120,27 @@ class Winamax():
             last_updated_tournament = -1
         else:
             last_updated_tournament = last_updated_tournament["value"]
-        last_updated_tournament = last_updated_tournament + 1
-        if last_updated_tournament >= len(tournaments):
-            last_updated_tournament = 0
-        suffix = tournaments[last_updated_tournament]["suffix"]
-        
-        (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
-        log(f"Rotating tournaments {last_updated_tournament}/{len(tournaments)}")
-        db.update_config("last_updated_tournament", { "value": last_updated_tournament})
-        http = Http(suffix)
-        self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
-        self.update_tournament(HttpStatic(suffix), sport_id, category_id, tournament_id)
+
+        current_tournament = last_updated_tournament + 1
+        while current_tournament != last_updated_tournament:
+            if tournaments[current_tournament]["favorite"]:
+                suffix = tournaments[current_tournament]["suffix"]
+                
+                (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
+
+                log(f"Rotating tournaments {current_tournament}/{len(tournaments)}")
+                db.update_config("last_updated_tournament", { "value": current_tournament})
+                http = Http(suffix)
+                self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
+                self.update_tournament(HttpStatic(suffix), sport_id, category_id, tournament_id)
+                return
+
+            current_tournament += 1
+            if current_tournament >= len(tournaments):
+                current_tournament = 0
+
+        log("No favorite tournament")
+            
 
         
     def update_tournament(self, http, sport_id, category_id, tournament_id):
@@ -124,7 +149,7 @@ class Winamax():
         if not http.data.get("matches"):
             log(f"Bad data")
             return
-            
+
         for match_id in http.data.get("matches"):
             match = http.data["matches"][match_id]
             bet = http.get("bets", match["mainBetId"])

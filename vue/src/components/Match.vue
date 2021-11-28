@@ -19,7 +19,7 @@
         <hr/>
         <outcome  :outcome-id="outcome" :scale="scale"></outcome>
       </div>
-  </div>
+    </div>
   </div>
 
 </template>
