@@ -3,17 +3,17 @@
       <h6>Sports</h6>
       <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
         <!-- Sport -->
-        <li v-show="sport.matches>0" class="list-group-item clickable" @click="open(sport, $event)">
+        <li v-show="sport.matches>=0" class="list-group-item clickable" @click="open(sport, $event)">
           {{sport.name}} ({{sport.matches}})
           <!-- Category -->
           <div v-show="sport.ui_open == true">
             <ul v-for="category in sport.categories" :key="category.categoryId" class="list-group">
-              <li v-show="category.matches>0" class="list-group-item clickable" @click="open(category, $event)">
+              <li v-show="category.matches>=0" class="list-group-item clickable" @click="open(category, $event)">
                 {{category.name}} ({{category.matches}})
                 <!-- Tournament -->
                 <div v-show="category.ui_open == true" @click.stop="">
                   <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
-                    <li v-show="tournament.matches>0" class="list-group-item clickable">
+                    <li v-show="tournament.matches>=0" class="list-group-item clickable">
                        <input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>
 
                        <router-link :to="to(tournament)">{{tournament.name}} ({{tournament.matches}})</router-link>
@@ -48,13 +48,21 @@ export default {
       this.sports = await this.get("/sports");
       this.auto_open()
     },
+    sort(array) {
+      const k = "matches";
+      return array.sort((a, b) => 
+        a[k] == b[k] ? 0 : a[k] < b[k] ? 1 : -1);
+    },
     auto_open() {
+      this.sort(this.sports);
       for (let sport of this.sports) {
         if (sport.id == this.sport_id) {
           sport.ui_open = true;
+          this.sort(sport.categories);
           for (let category of sport.categories) {
             if (category.id == this.category_id) {
               category.ui_open = true;
+              this.sort(category.tournaments);
             }
           }
         }
