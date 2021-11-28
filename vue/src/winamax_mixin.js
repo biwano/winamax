@@ -17,8 +17,8 @@ export default {
       tournament_id() {
         return parseInt(this.$route.params.tournament_id);
       },
-      categorty_id() {
-        return parseInt(this.$route.params.categorty_id);
+      category_id() {
+        return parseInt(this.$route.params.category_id);
       },
       match_id() {
         return parseInt(this.$route.params.match_id);

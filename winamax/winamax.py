@@ -60,6 +60,13 @@ class Winamax():
                 sport["matches"] += category["matches"]
         db.update_config("sports", self.sports)
 
+    def get_tournament_list(self):
+        res_tournaments = []
+        for sport in self.sports:
+            for category in sport["categories"]:
+                res_tournaments += category["tournaments"]
+        return res_tournaments
+
     def update_tournament_config(self, sport_id, category_id, tournament_id, value):
         tournament = self.get_tournament(sport_id, category_id,tournament_id)
         tournament.update(value)
@@ -115,7 +122,7 @@ class Winamax():
 
     def update_next_tournament(self):
         last_updated_tournament = db.get_config("last_updated_tournament")
-        tournaments = db.get_config("tournaments")
+        tournaments = self.get_tournament_list()
         if last_updated_tournament == None:
             last_updated_tournament = -1
         else:
@@ -123,7 +130,8 @@ class Winamax():
 
         current_tournament = last_updated_tournament + 1
         while current_tournament != last_updated_tournament:
-            if tournaments[current_tournament]["favorite"]:
+            log(tournaments[current_tournament].get("favorite"))
+            if tournaments[current_tournament].get("favorite"):
                 suffix = tournaments[current_tournament]["suffix"]
                 
                 (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
