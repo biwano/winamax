@@ -2,10 +2,12 @@
   <div>
       <h6>Sports</h6>
       <div class="form-check">
+        <!--
         <input class="form-check-input" type="checkbox" v-model="only_favorites" />
         <label class="form-check-label" for="flexCheckDefault">
         Only favorites
         </label>
+      -->
       </div>
       <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
         <!-- Sport -->
@@ -20,7 +22,7 @@
                 <div v-show="category.ui_open == true" @click.stop="">
                   <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
                     <li v-show="!only_favorites || tournament.favorite" class="list-group-item clickable">
-                       <input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>
+                       <!--<input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>-->
 
                        <router-link :to="to(tournament)">{{tournament.name}} ({{tournament.matches}})</router-link>
 
@@ -47,7 +49,7 @@ export default {
   data() {
     return { 
       sports: [],
-      only_favorites: true
+      only_favorites: false
     }
   },
   watch : {

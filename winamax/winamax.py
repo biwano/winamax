@@ -130,8 +130,7 @@ class Winamax():
 
         current_tournament = last_updated_tournament + 1
         while current_tournament != last_updated_tournament:
-            log(tournaments[current_tournament].get("favorite"))
-            if tournaments[current_tournament].get("favorite"):
+            if True or tournaments[current_tournament].get("favorite"):
                 suffix = tournaments[current_tournament]["suffix"]
                 
                 (sport_id, category_id, tournament_id) = self.suffix_explode(suffix)
@@ -139,7 +138,7 @@ class Winamax():
                 log(f"Rotating tournaments {current_tournament}/{len(tournaments)}")
                 db.update_config("last_updated_tournament", { "value": current_tournament})
                 http = Http(suffix)
-                self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
+                #self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
                 self.update_tournament(HttpStatic(suffix), sport_id, category_id, tournament_id)
                 return
 
