@@ -130,6 +130,8 @@ class Winamax():
 
         current_tournament = last_updated_tournament + 1
         while current_tournament != last_updated_tournament:
+            if current_tournament >= len(tournaments):
+                current_tournament = 0
             if True or tournaments[current_tournament].get("favorite"):
                 suffix = tournaments[current_tournament]["suffix"]
                 
@@ -143,8 +145,6 @@ class Winamax():
                 return
 
             current_tournament += 1
-            if current_tournament >= len(tournaments):
-                current_tournament = 0
 
         log("No favorite tournament")
             
