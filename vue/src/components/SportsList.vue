@@ -1,6 +1,6 @@
 <template>
   <div>
-      <h6>Sports</h6>
+      <h6>Tournois</h6>
       <div class="form-check">
         <!--
         <input class="form-check-input" type="checkbox" v-model="only_favorites" />

@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      Winamax Boss
+      <h4>Winamax Boss: The best app to crack bets open.</h4>
     </nav>
       
     <div class="container-fluid">
@@ -18,8 +18,6 @@
         </div>
         <div class="col-md-6">
           <div class="home">
-            Welcome to Winamax Boss. The best app to crack bets open.
-            <hr/>
             <match></match>
           </div>
         </div>
