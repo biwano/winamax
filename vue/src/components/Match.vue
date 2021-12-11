@@ -1,20 +1,25 @@
 <template>
   <div>
     <div v-if="match && match.bet">
-      <div class="float-right">
-        <button type="button" class="btn btn-success" @click="send_mail">Prévenir Lala</button>
+      <div class="float-right text-right">
+        <button type="button" class="btn btn-success" @click="send_mail"><i class="fas fa-envelope"></i>&nbsp;Prévenir Lala</button><br/>
+        <a @click="embed" href="javascript:;"><i class="fas fa-paste"></i></a>
       </div>
       <div>
         <h6>{{ match.competitor1Name }} - {{ match.competitor2Name }}</h6>
-        {{ date(match.matchStart) }}
+        <i class="fas fa-calendar"></i>&nbsp;{{ date(match.matchStart) }}
       </div>
-      <ul class="nav nav-pills">
-        <li v-for="s in scales" :key="s.value" class="nav-item" 
-          @click="scale = s" 
-          >
-          <a class="nav-link" href="javascript:;" :class="{active: s.value==scale.value}">{{s.label}}</a>
-        </li>
-      </ul>
+      <hr/>
+      <div class="d-inline-flex">
+        <i class="fas fa-cog" style="margin:auto;"></i>
+        <ul class="nav nav-pills">
+          <li v-for="s in scales" :key="s.value" class="nav-item" 
+            @click="scale = s" 
+            >
+            <a class="nav-link" href="javascript:;" :class="{active: s.value==scale.value}">{{s.label}}</a>
+          </li>
+        </ul>
+      </div>
       <div v-for="outcome in match.bet.outcomes" :key="outcome">
         <hr/>
         <outcome  :outcome-id="outcome" :scale="scale"></outcome>
@@ -57,6 +62,10 @@ export default {
     },
     send_mail() {
       this.post(`/matches/${this.match_id}/send_mail`);
+    },
+    embed() {
+      var copyText = `<iframe src="http://winamax.ilponse.com/#/embed/${this.sport_id}/${this.category_id}/${this.tournament_id}/${this.match_id}" height="1000px" frameBorder="0"></iframe>`;
+      navigator.clipboard.writeText(copyText);
     }
   },
   created() {

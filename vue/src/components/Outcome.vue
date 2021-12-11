@@ -1,7 +1,7 @@
 <template>
   <div>
     <h6>
-    {{ outcome.label }}: {{ outcome.percentDistribution }}%</h6> 
+      <i class="fas fa-coins"></i>&nbsp;{{ outcome.label }}: {{ outcome.percentDistribution }}%</h6> 
     
     <outcome-chart 
       :outcome-id="outcomeId" 
