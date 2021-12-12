@@ -2,10 +2,12 @@
   <div>
     <app-nav></app-nav>
     <div class="container-fluid">
+      <span class="lead">Créez votre tableau de bord</span><br/>
       <a href="javascript:;" @click="add_panel()"><i class="fas fa-plus-circle"></i>&nbsp;Ajouter un panneau</a>
+      <hr/>
       <div class="row">
         <div v-for="panel in panels"  :key="panel" :class="`col-md-${panel_class}`">
-          <dashboard-panel></dashboard-panel>
+          <dashboard-panel @remove="remove_panel(panel)" ></dashboard-panel>
         </div>
       </div>
     </div>
@@ -30,6 +32,9 @@ export default {
     add_panel() {
       this.panels.push(this.panel_id);
       this.panel_id++;
+    },
+    remove_panel(panel) {
+      this.panels.splice(this.panels.indexOf(panel), 1);
     }
   },
   computed: {

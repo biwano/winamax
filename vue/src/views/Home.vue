@@ -6,20 +6,22 @@
         <div class="col-md-6">
           <div class="row">
             <div class="col-md-6">
-              <sports-list @tournament="navigate_tournament"></sports-list>
+              <sports-list @tournament="set_tournament"
+              :input_sport_id="$route.params.sport_id"
+              :input_category_id="$route.params.category_id"
+              :input_tournament_id="$route.params.tournament_id"></sports-list>
             </div>
             <div class="col-md-6">
-              <matches-list @match="navigate_match"
-                :sport_id="route_sport_id"
-                :category_id="route_category_id"
-                :tournament_id="route_tournament_id"
+              <matches-list v-if="$route.params.tournament_id" @match="set_match"
+                :input_match_id="$route.params.match_id"
+                :query="{tournament_id: $route.params.tournament_id}"
               ></matches-list>
             </div>
           </div>
         </div>
         <div class="col-md-6">
           <div class="home">
-            <match :match_id="route_match_id"></match>
+            <match :match_id="$route.params.match_id"></match>
           </div>
         </div>
       </div>
@@ -42,7 +44,7 @@ export default {
   },
   mixins: [winamax_mixin],
   methods: {
-    navigate_tournament(tournament) {
+    set_tournament(tournament) {
       this.$router.push({ 
         name: 'Tournament', 
         params: { 
@@ -52,7 +54,7 @@ export default {
           }
         });
     },
-    navigate_match(match) {
+    set_match(match) {
       this.$router.push({
         name: 'Match', 
         params: {

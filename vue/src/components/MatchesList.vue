@@ -1,11 +1,14 @@
 <template>
   <div>
-    <h6>Matchs</h6>
-    <h6 v-show="matches.length == 0">Aucun match</h6>
+    <span class="lead">Matchs</span><br/>
+    <span v-show="matches.length == 0">Aucun match</span>
     <ul  class="nav nav-pills flex-column">
       <li v-for="match in matches" :key="match.matchId" class="nav-item">
-         <a href="javascript:;" @click="$emit('match', match)" class="nav-link" ::class="clazz(match)">{{ label(match) }}</a>
-
+         <a href="javascript:;" 
+          @click="$emit('match', match)" 
+          class="nav-link" 
+          :class="clazz(match)"
+          :title="`${match.sport.name} - ${match.category.name } - ${match.tournament.name}`">{{ label(match) }}</a>
       </li>
     </ul>
   </div>
@@ -16,29 +19,29 @@ import winamax_mixin from "@/winamax_mixin"
 export default {
   name: 'MatchesList',
   mixins: [winamax_mixin],
-  props: ["sport_id", "category_id", "tournament_id" ],
+  props: [ "query", "input_match_id" ],
   data() {
     return { 
       matches: [],      
     }
   },
   watch : {
-    tournament_id() {
+    query() {
       this.load();
     }
   },
   methods: {
     async load() {
-      if (this.tournament_id) {
-        this.matches = await this.get(`/tournaments/${this.tournament_id}/matches`);
+      if (this.query) {
+        this.matches = await this.get(`/matches?query=${encodeURIComponent(JSON.stringify(this.query))}`);
       }
     },
     label(match) {
-      return `${match.competitor1Name} ${match.competitor2Name} `
+      return `${this.date(match.matchStart)}: ${match.competitor1Name} - ${match.competitor2Name} `
     },
     clazz(match) {
       var res = {}
-      if (match.matchId == this.match_id) res["active"] = true;
+      if (match.matchId == this.input_match_id) res["active"] = true;
       if (match.mainBetId === null) res["disabled"] = true;
       return res;
     }
@@ -46,9 +49,6 @@ export default {
   },
   created() {
     this.load();
-    window.setInterval(() => {
-      this.load();
-    }, 10000);
   }
 }
 </script>

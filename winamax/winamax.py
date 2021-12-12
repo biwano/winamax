@@ -54,7 +54,7 @@ class Winamax():
             for category in sport["categories"]:
                 category["matches"] = 0
                 for tournament in category["tournaments"]:
-                    db_matches = self.get_matches(tournament["id"])
+                    db_matches = self.get_tournament_matches(tournament["id"])
                     tournament["matches"] = len(db_matches)
                     category["matches"] += tournament["matches"]
                 sport["matches"] += category["matches"]
@@ -171,7 +171,7 @@ class Winamax():
                         db.historize_outcome(outcome)
 
         # Delete expired matches and outcomes
-        db_matches = self.get_matches(tournament_id)
+        db_matches = self.get_tournament_matches(tournament_id)
         for match in db_matches:
             match_id = match["matchId"]
             if not http.exists("matches", match_id):
@@ -190,9 +190,12 @@ class Winamax():
                 if self.check_match(match_id):
                     self.send_match_notification(match_id=match_id)
 
-    def get_matches(self, tournament_id):
+    def get_tournament_matches(self, tournament_id):
+        return self.get_matches({"tournament_id": tournament_id})
+
+    def get_matches(self, params):
         with self.Session() as session:
-             matches = session.query(db.Match).filter_by(tournament_id=tournament_id).all()
+             matches = session.query(db.Match).filter_by(**params).order_by("match_start").all()
              return [ self.serialize_match(match) for match in matches ]
 
     def get_match(self, match_id):
@@ -201,7 +204,11 @@ class Winamax():
              return self.serialize_match(match)
 
     def serialize_match(self, match):
-        return json.loads(match.value)
+        match =  json.loads(match.value)
+        match["sport"] = self.get_sport(match["sportId"])
+        match["category"] = self.get_category(match["sportId"], match["categoryId"])
+        match["tournament"] = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
+        return match
 
     def get_outcome(self, outcome_id):
         with self.Session() as session:
@@ -251,7 +258,7 @@ class Winamax():
             return False
         first_odds = first.get("data").get("odds")
         last_odds = last.get("data").get("odds")
-        if first_odds < 1 or first_odds > 2:
+        if first_odds < 1 or first_odds > 10:
             log(f"- Bad odds: {first_odds}")
             return False
 

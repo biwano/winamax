@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Embed from '../views/Embed.vue'
 import Dashboard from '../views/Dashboard.vue'
+import NextMatches from '../views/NextMatches.vue'
 
 Vue.use(VueRouter)
 
@@ -31,6 +32,11 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard
+  },
+  {
+    path: '/next_matches',
+    name: 'NextMatches',
+    component: NextMatches
   }
 ]
 
