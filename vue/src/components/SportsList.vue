@@ -23,10 +23,7 @@
                   <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
                     <li v-show="!only_favorites || tournament.favorite" class="list-group-item clickable">
                        <!--<input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>-->
-
-                       <router-link :to="to(tournament)">{{tournament.name}} ({{tournament.matches}})</router-link>
-
-
+                       <a href="javascript:;" @click="$emit('tournament', tournament)">{{tournament.name}} ({{tournament.matches}})</a>
                     </li>
                   </ul>
                 </div>
@@ -64,7 +61,6 @@ export default {
     },
     sort(array) {
       const k = "matches";
-      console.log(array);
       return array.sort((a, b) => 
         a[k] == b[k] ? 0 : a[k] < b[k] ? 1 : -1);
     },
@@ -103,17 +99,6 @@ export default {
       this.post(`/tournaments/${tournament.sportId}/${tournament.categoryId}/${tournament.tournamentId}`, 
         { favorite: tournament.favorite});
     },
-    to(tournament) {
-      return { 
-        name: "Tournament", 
-        params: {
-          sport_id: tournament.sportId,
-          category_id: tournament.categoryId,
-          tournament_id: tournament.tournamentId
-        }
-      };
-    }
-
   },
   created() {
     this.load();
