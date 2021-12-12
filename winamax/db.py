@@ -29,7 +29,9 @@ class Match(Base):
    sport_id = Column(Integer)
    category_id = Column(Integer)
    tournament_id = Column(Integer)
-   value= Column(String)
+   value = Column(String)
+   match_start = Column(Integer)
+   status = Column(String)
 
 class Config(Base):
    __tablename__ = 'config'
@@ -103,9 +105,12 @@ def update_match(match):
               sport_id=match["sportId"],
               category_id=match["categoryId"],
               tournament_id=match["tournamentId"],
+              match_start=match["matchStart"],
+              status=match["status"],
               )
             session.add(db_match)
         db_match.value = json.dumps(match)
+        db_match.status = match.get("status")
 
 def delete_match(match_id):
     with Session()() as session:

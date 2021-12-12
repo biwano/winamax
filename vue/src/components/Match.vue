@@ -2,11 +2,12 @@
   <div>
     <div v-if="match && match.bet">
       <div class="float-right text-right">
-        <button type="button" class="btn btn-success" @click="send_mail"><i class="fas fa-envelope"></i>&nbsp;Prévenir Lala</button><br/>
-        <a @click="embed" href="javascript:;"><i class="fas fa-paste"></i></a>
+        <a @click="send_mail" href="javascript:;"><i class="fas fa-envelope"></i>&nbsp;Prévenir Lala</a><br/>
+        <a @click="embed" href="javascript:;"><i class="fas fa-paste"></i>&nbsp;Copier le code d'intégration</a>
       </div>
       <div>
-        <h6>{{ match.competitor1Name }} - {{ match.competitor2Name }}</h6>
+        <span class="lead">{{ match.competitor1Name }} - {{ match.competitor2Name }}</span><br/>
+        <i>&nbsp;{{ match.sport.name }} - {{ match.category.name }} - {{ match.tournament.name }}</i><br/>
         <i class="fas fa-calendar"></i>&nbsp;{{ date(match.matchStart) }}
       </div>
       <hr/>
@@ -36,6 +37,7 @@ import { scales } from "@/components/Outcome.vue"
 export default {
   name: 'Match',
   mixins: [winamax_mixin],
+  props: [ "match_id" ],
   components: { Outcome },
   data() {
     return { 
@@ -45,7 +47,7 @@ export default {
     }
   },
   watch : {
-    $route() {
+    match_id() {
       this.load();
     }
   },
@@ -54,11 +56,6 @@ export default {
       if (this.match_id) {
         this.match = await this.get(`/matches/${this.match_id}`);
       }
-    },
-    date(timestamp) {
-      var date = new Date(timestamp * 1000);
-      /*var date_format_str = date.getFullYear().toString()+"-"+((date.getMonth()+1).toString().length==2?(date.getMonth()+1).toString():"0"+(date.getMonth()+1).toString())+"-"+(date.getDate().toString().length==2?date.getDate().toString():"0"+date.getDate().toString())+" "+(date.getHours().toString().length==2?date.getHours().toString():"0"+date.getHours().toString())+":"+((parseInt(date.getMinutes()/5)*5).toString().length==2?(parseInt(date.getMinutes()/5)*5).toString():"0"+(parseInt(date.getMinutes()/5)*5).toString())+":00";*/
-      return date;
     },
     send_mail() {
       this.post(`/matches/${this.match_id}/send_mail`);
@@ -70,6 +67,9 @@ export default {
   },
   created() {
     this.load();
+    window.setInterval(() => {
+      this.load();
+    }, 60000);
   }
 }
 </script>

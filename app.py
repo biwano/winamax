@@ -24,7 +24,14 @@ def update_tournament(sport_id, category_id, tournament_id):
 # tournament matches
 @app.route('/tournaments/<int:tournament_id>/matches')
 def get_matches(tournament_id):
-    return jsonify(winamax.get_matches(tournament_id=tournament_id))
+    return jsonify(winamax.get_tournament_matches(tournament_id=tournament_id))
+
+# match
+@app.route('/matches')
+def get_coming_matches():
+    query = request.args.get('query')
+    query = json.loads(query)
+    return jsonify(winamax.get_matches(query))
 
 # match
 @app.route('/matches/<int:match_id>')

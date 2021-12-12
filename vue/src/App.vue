@@ -14,4 +14,13 @@ export default {
 .clickable {
   cursor:pointer;  
 }
+.list-group-item.active a {
+  color: #fff;
+}
+.float-right {
+  float: right;
+}
+.text-right {
+  text-align: right;
+}
 </style>
