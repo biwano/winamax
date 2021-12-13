@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import create_engine, Table, Index, Column, Numeric, BigInteger, Integer, String, MetaData, DateTime
+from sqlalchemy import create_engine, Table, Index, Column, Numeric, BigInteger, Integer, Boolean, String, MetaData, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from contextlib import contextmanager
@@ -32,6 +32,7 @@ class Match(Base):
    value = Column(String)
    match_start = Column(Integer)
    status = Column(String)
+   marked = Column(Boolean)
 
 class Config(Base):
    __tablename__ = 'config'
@@ -111,6 +112,8 @@ def update_match(match):
             session.add(db_match)
         db_match.value = json.dumps(match)
         db_match.status = match.get("status")
+        if match.get("marked"):
+            db_match.marked = match.get("marked")
 
 def delete_match(match_id):
     with Session()() as session:
