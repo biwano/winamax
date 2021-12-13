@@ -3,7 +3,7 @@
     <div v-if="match && match.bet">
       <div class="float-right text-right">
         <a @click="send_mail" href="javascript:;"><i class="fas fa-envelope"></i>&nbsp;Prévenir Lala</a><br/>
-        <a @click="embed" href="javascript:;"><i class="fas fa-paste"></i>&nbsp;Copier le code d'intégration</a>
+        <a :href="`https://www.winamax.fr/paris-sportifs/match/${match_id}`" target="_blank"><img src="https://operator-front-static-cdn.winamax.fr/img/style/v2/common/logo-highlight.png" height="32px"/></a>
       </div>
       <div>
         <span class="lead">{{ match.competitor1Name }} - {{ match.competitor2Name }}</span><br/>
