@@ -97,15 +97,15 @@ class Winamax():
                     }
                     # Get old tournament computed data
                     old_tournament = self.get_tournament(sport_id, category_id, tournament_id)
-                    if old_tournament and "matches" in old_tournament:
-                        res_tournament["matches"] = old_tournament["matches"]
-                    else:
-                        res_tournament["matches"] = 0
+                    def update_extra(key, default):
+                        if old_tournament and key in old_tournament:
+                            res_tournament[key] = old_tournament[key]
+                        else:
+                            res_tournament[key] = default
 
-                    if old_tournament and "favorite" in old_tournament:
-                        res_tournament["favorite"] = old_tournament["favorite"]
-                    else:
-                        res_tournament["favorite"] = False
+                    update_extra("matches", 0)
+                    update_extra("favorite", False)
+                    update_extra("marked", False)
 
                     res_category["tournaments"].append(res_tournament)
                     res_tournaments.append(res_tournament)
@@ -187,8 +187,12 @@ class Winamax():
         # Check matches for opportunities
         for match_id in http.data["matches"]:
             #if str(match["tournamentId"]) == str(tournament_id):
+                match = http.data["matches"][match_id]
                 if self.check_match(match_id):
                     self.send_match_notification(match_id=match_id)
+                    match["marked"] = True
+                    db.update_match(match)
+
 
     def get_tournament_matches(self, tournament_id):
         return self.get_matches({"tournament_id": tournament_id})
@@ -203,11 +207,14 @@ class Winamax():
              match = session.query(db.Match).filter_by(match_id=match_id).one()
              return self.serialize_match(match)
 
-    def serialize_match(self, match):
-        match =  json.loads(match.value)
+    def serialize_match(self, db_match):
+        match =  json.loads(db_match.value)
         match["sport"] = self.get_sport(match["sportId"])
         match["category"] = self.get_category(match["sportId"], match["categoryId"])
         match["tournament"] = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
+        match["status"] = db_match.status
+        match["marked"] = db_match.marked
+
         return match
 
     def get_outcome(self, outcome_id):
@@ -218,7 +225,6 @@ class Winamax():
     def get_outcome_history(self, outcome_id):
         with self.Session() as session:
             histories = session.query(db.History).filter_by(outcome_id=outcome_id).order_by(db.History.time)
-
             return [ self.serialize_history(h) for h in histories.all() ]
 
     def serialize_history(self, history):
@@ -270,7 +276,7 @@ class Winamax():
         return True
     
     def matchInfo(self, match):
-        res = ""
+        res = str(match["matchId"])
         def add(t):
             nonlocal res
             if res:
@@ -285,6 +291,8 @@ class Winamax():
 
     def check_match(self, match_id):
         match = self.get_match(match_id)
+        if match.get("marked"):
+            return False
         match_start = match.get("matchStart")
         now = datetime.now()
         timestamp = datetime.timestamp(now)
