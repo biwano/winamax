@@ -9,7 +9,8 @@
       </ul>
 
       <ul class="navbar-nav">
-        <li class="nav-item"> <router-link class="nav-link" to="/next_matches">Prochain matches</router-link></li>
+        <li class="nav-item"> <router-link class="nav-link" to="/next_matches">Prochain matchs</router-link></li>
+        <li class="nav-item"> <router-link class="nav-link" to="/marked_matches">Matchs intéressants</router-link></li>
         <li class="nav-item"> <router-link class="nav-link" to="/dashboard">Dashboard</router-link></li>
       </ul>
     </div>

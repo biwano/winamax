@@ -12,7 +12,7 @@
               :input_tournament_id="$route.params.tournament_id"></sports-list>
             </div>
             <div class="col-md-6">
-              <matches-list v-if="$route.params.tournament_id" @match="set_match"
+              <matches-list v-if="$route.params.tournament_id" @match="set_match" title="Matchs"
                 :input_match_id="$route.params.match_id"
                 :query="{tournament_id: $route.params.tournament_id}"
               ></matches-list>

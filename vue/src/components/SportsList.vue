@@ -9,21 +9,21 @@
         </label>
       -->
       </div>
-      <ul v-for="sport in sports" :key="sport.sportId" class="list-group">
+      <ul v-for="sport in sports" :key="sport.sportId" class="nav nav-pills">
         <!-- Sport -->
-        <li v-show="!only_favorites || sport.favorite" class="list-group-item clickable" @click="open(sport, $event)">
-          {{sport.name}} ({{sport.matches}})
+        <li v-show="sport.matches" class="nav-item clickable" @click="open(sport, $event)">
+          <span style="font-weight: 1000">{{sport.name}} ({{sport.matches}})</span>
           <!-- Category -->
-          <div v-show="sport.ui_open == true">
-            <ul v-for="category in sport.categories" :key="category.categoryId" class="list-group">
-              <li v-show="!only_favorites || category.favorite" class="list-group-item clickable" @click="open(category, $event)">
+          <div v-show="sport.ui_open == true" class="child">
+            <ul v-for="category in sport.categories" :key="category.categoryId" class="nav nav-pills">
+              <li v-show="category.matches" class="nav-item clickable" @click="open(category, $event)" style="list-style:circle">
                 {{category.name}} ({{category.matches}})
                 <!-- Tournament -->
-                <div v-show="category.ui_open == true" @click.stop="">
-                  <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="list-group">
-                    <li v-show="!only_favorites || tournament.favorite" class="list-group-item" :class="clazz(tournament)">
+                <div v-show="category.ui_open == true" @click.stop="" class="child">
+                  <ul v-for="tournament in category.tournaments" :key="tournament.tournamentId" class="nav nav-pills">
+                    <li v-show="tournament.matches" class="nav-item clickable" :class="clazz(tournament)" style="list-style:square">
                        <!--<input class="form-check-input" type="checkbox" v-model="tournament.favorite" @click.stop="switch_favorite(tournament)"/>-->
-                       <a href="javascript:;" @click="$emit('tournament', tournament)">{{tournament.name}} ({{tournament.matches}})</a>
+                       <a href="javascript:;" @click="$emit('tournament', tournament)" style="text-decoration: none">{{tournament.name}} ({{tournament.matches}})</a>
                     </li>
                   </ul>
                 </div>
@@ -108,4 +108,7 @@ export default {
 }
 </script>
 <style scoped>
+  .child {
+      margin-left:25px;
+  }
 </style>
