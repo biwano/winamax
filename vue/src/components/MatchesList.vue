@@ -1,8 +1,8 @@
 <template>
   <div>
-    <span class="lead">Matchs</span><br/>
+    <span class="lead">{{ title }}</span><br/>
     <span v-show="matches.length == 0">Aucun match</span>
-    <ul  class="nav nav-pills flex-column">
+    <ul  class="nav nav-pills">
       <li v-for="match in matches" :key="match.matchId" class="nav-item">
          <a href="javascript:;" 
           @click="$emit('match', match)" 
@@ -19,7 +19,7 @@ import winamax_mixin from "@/winamax_mixin"
 export default {
   name: 'MatchesList',
   mixins: [winamax_mixin],
-  props: [ "query", "input_match_id" ],
+  props: [ "query", "input_match_id", "title" ],
   data() {
     return { 
       matches: [],      

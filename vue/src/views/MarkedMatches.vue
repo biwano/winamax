@@ -4,9 +4,9 @@
     <div class="container">
       <div class="row">
         <div class="col-md-4">
-          <matches-list @match="set_match" title="Prochains Matchs"
+          <matches-list @match="set_match" title="Matchs intéressants"
           :input_match_id="match_id"
-            :query="{status: 'PREMATCH'}"
+            :query="{marked: true}"
           ></matches-list>
         </div>
         <div class="col-md-8">
