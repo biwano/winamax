@@ -43,6 +43,9 @@ class Cli:
     def test(self, **kwargs):
         self.winamax.test()
 
+    def purge(self, **kwargs):
+        self.winamax.purge()
+
     """
     def take_outcomes_snapshot(self, **kwargs):
         self.winamax.take_outcomes_snapshot()
