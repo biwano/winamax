@@ -139,7 +139,6 @@ class Winamax():
 
                 log(f"Rotating tournaments {current_tournament}/{len(tournaments)}")
                 db.update_config("last_updated_tournament", { "value": current_tournament})
-                http = Http(suffix)
                 #self.update_tournament(Http(suffix), sport_id, category_id, tournament_id)
                 self.update_tournament(HttpStatic(suffix), sport_id, category_id, tournament_id)
                 return
@@ -176,10 +175,7 @@ class Winamax():
             match_id = match["matchId"]
             if not http.exists("matches", match_id):
                 bet = http.get("bets", match_id)
-                if bet:
-                    for outcome_id in bet["outcomes"]:
-                        db.delete_outcome_history(outcome_id)
-                db.delete_match(match_id)
+                self.delete_match(http, match_id)
 
         # update sports matches number
         self.update_sports_nb_matches()
@@ -193,11 +189,17 @@ class Winamax():
                     match["marked"] = True
                     db.update_match(match)
 
+    def delete_match(self, http,  match_id):
+        bet = http.get("bets", match_id)
+        if bet:
+            for outcome_id in bet["outcomes"]:
+                db.delete_outcome_history(outcome_id)
+        db.delete_match(match_id)
 
     def get_tournament_matches(self, tournament_id):
         return self.get_matches({"tournament_id": tournament_id})
 
-    def get_matches(self, params):
+    def get_matches(self, params={}):
         with self.Session() as session:
              matches = session.query(db.Match).filter_by(**params).order_by("match_start").all()
              return [ self.serialize_match(match) for match in matches ]
@@ -310,6 +312,17 @@ class Winamax():
             if self.check_outcome(outcome_id):
                 return True
         return False
+
+    def purge(self):
+        matches = self.get_matches()
+        now = datetime.now()
+        timestamp = datetime.timestamp(now)
+        http = HttpStatic()
+        for match in matches:
+            tournament = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
+            if not tournament:
+                self.delete_match(http, match["matchId"])
+
     
     def test(self):
         http = Http("/1/44/207")
