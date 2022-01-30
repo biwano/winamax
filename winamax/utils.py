@@ -46,12 +46,12 @@ def send_mail(subject, body):
     
     # Create a secure SSL context
     sender_email = config.sender_email
-    receiver_email = config.receiver_email
+    receivers_email = config.receiver_email
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = sender_email
-    message["To"] = receiver_email
+    message["To"] = receivers_email
 
     part1 = MIMEText(body, "html")
     message.attach(part1)
@@ -60,6 +60,6 @@ def send_mail(subject, body):
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login(sender_email, config.sender_password)
         server.sendmail(
-            sender_email, receiver_email, message.as_string()
+            sender_email, receivers_email.split(","), message.as_string()
         )
    
