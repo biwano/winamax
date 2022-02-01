@@ -242,9 +242,11 @@ class Winamax():
     def send_match_notification(self, match_id):
         match=self.get_match(match_id)
         subject = f"{match['competitor1Id'] - match['competitor2Id']}"
-        message = f"""J'ai un tips pour toi<br/>
-        Clique ici:<br/>
-        <a href='{config.endpoint}/#/{match['sportId']}/{match['categoryId']}/{match['tournamentId']}/{match['matchId']}'
+        url = f"{config.endpoint}/#/{match['sportId']}/{match['categoryId']}/{match['tournamentId']}/{match['matchId']}"
+        message = f"""Salut<br/><br/>
+        J'ai un tip pour toi<br/>
+        Clique <a href='{url}'>ici</a>:<br/><br/>
+        Good luck
         """
         utils.send_mail(subject, message)
         return { "result": "ok"}
