@@ -41,12 +41,17 @@ def get_last_n_lines(file_name, N):
     # return the reversed list
     return list(list_of_lines)
 
-def send_mail(subject, body):
+def send_mail(subject, body, mode):
     port = 465  # For SSL
     
     # Create a secure SSL context
     sender_email = config.sender_email
-    receivers_email = config.receiver_email
+    if mode == "manual":
+        receivers_email = config.receiver_email_manual
+    elif mode == "auto":
+        receivers_email = config.receiver_email_auto
+    else:
+        raise(Exception("mail: Unknown mode"))
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
