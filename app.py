@@ -41,7 +41,7 @@ def get_match(match_id=None):
 # send mail
 @app.route('/matches/<int:match_id>/send_mail', methods=["POST"])
 def send_match_notification(match_id=None):
-    return jsonify(winamax.send_match_notification(match_id=match_id))
+    return jsonify(winamax.send_match_notification(match_id=match_id, mode="manual"))
 
 # outcome
 @app.route('/outcomes/<int:outcome_id>')

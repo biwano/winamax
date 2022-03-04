@@ -185,7 +185,7 @@ class Winamax():
             #if str(match["tournamentId"]) == str(tournament_id):
                 match = http.data["matches"][match_id]
                 if self.check_match(match_id):
-                    self.send_match_notification(match_id=match_id)
+                    self.send_match_notification(match_id=match_id, mode="auto")
                     match["marked"] = True
                     db.update_match(match)
 
@@ -239,7 +239,7 @@ class Winamax():
         logs = utils.get_last_n_lines('db.log', nb_lines)
         return logs
 
-    def send_match_notification(self, match_id):
+    def send_match_notification(self, match_id, mode):
         match=self.get_match(match_id)
         subject = f"{match['competitor1Id'] - match['competitor2Id']}"
         url = f"{config.endpoint}/#/{match['sportId']}/{match['categoryId']}/{match['tournamentId']}/{match['matchId']}"
@@ -248,7 +248,7 @@ class Winamax():
         Clique <a href='{url}'>ici</a>:<br/><br/>
         Good luck
         """
-        utils.send_mail(subject, message)
+        utils.send_mail(subject, message, mode=mode)
         return { "result": "ok"}
 
     def check_outcome(self, outcome_id):
