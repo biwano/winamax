@@ -16,23 +16,35 @@ fh.setLevel(level=logging.DEBUG)
 logger.addHandler(fh)
 
 class History(Base):
-   __tablename__ = 'history'
-   
-   outcome_id = Column(Integer, primary_key = True)
-   time = Column(BigInteger, primary_key = True)
-   data = Column(String)
+    __tablename__ = 'history'
+    
+    outcome_id = Column(Integer, primary_key = True)
+    time = Column(BigInteger, primary_key = True)
+    data = Column(String)
 
 class Match(Base):
-   __tablename__ = 'match'
+    __tablename__ = 'match'
    
-   match_id = Column(Integer, primary_key = True)
-   sport_id = Column(Integer)
-   category_id = Column(Integer)
-   tournament_id = Column(Integer)
-   value = Column(String)
-   match_start = Column(Integer)
-   status = Column(String)
-   marked = Column(Boolean)
+    match_id = Column(Integer, primary_key = True)
+    sport_id = Column(Integer)
+    category_id = Column(Integer)
+    tournament_id = Column(Integer)
+    value = Column(String)
+    match_start = Column(Integer)
+    status = Column(String)
+    _marks = Column(String)
+ 
+    @property
+    def marks(self):
+        marks = self._marks
+        if not marks:
+            marks = json.dumps([])
+        return json.loads(marks)
+    
+    @marks.setter
+    def marks(self, new_marks):
+        self._marks = json.dumps(new_marks)
+
 
 class Config(Base):
    __tablename__ = 'config'
@@ -108,12 +120,17 @@ def update_match(match):
               tournament_id=match["tournamentId"],
               match_start=match["matchStart"],
               status=match["status"],
+              marks = json.dumps([])
               )
             session.add(db_match)
         db_match.value = json.dumps(match)
         db_match.status = match.get("status")
-        if match.get("marked"):
-            db_match.marked = match.get("marked")
+        new_mark = match.get("new_mark")
+        if new_mark:
+            marks = db_match.marks
+            if not new_mark in marks:
+                marks.append(new_mark)
+                db_match.marks = marks
 
 def delete_match(match_id):
     with Session()() as session:
@@ -124,7 +141,7 @@ def delete_match(match_id):
 def delete_outcome_history(outcome_id):
     with Session()() as session:
         logger.info(f"Deleting outcome history: {outcome_id}")
-        session.query(History).filter_by(outcom_id=outcome_id).delete()
+        session.query(History).filter_by(outcome_id=outcome_id).delete()
 
 def historize_outcome(outcome):
     time = datetime.now().timestamp()
@@ -136,3 +153,8 @@ def historize_outcome(outcome):
             time=time,
             data=json.dumps(outcome))
         session.add(history)
+
+def get_outcomes():
+    with Session()() as session:
+        return session.query(History).order_by(History.time.asc()).limit(1000)
+

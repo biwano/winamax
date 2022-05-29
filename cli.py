@@ -30,7 +30,7 @@ class Cli:
         self.winamax.update_tournament(args.sport_id, args.category_id, args.tournament_id)
 
     def check_match(self, **kwargs):
-        print(self.winamax.check_match(args.match_id))
+        print(self.winamax.check_match(args.match_id, Winamax.checks[1]))
 
     def send_mail(self):
         utils.send_mail("coucou", 

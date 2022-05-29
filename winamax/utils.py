@@ -46,10 +46,9 @@ def send_mail(subject, body, mode):
     
     # Create a secure SSL context
     sender_email = config.sender_email
-    if mode == "manual":
-        receivers_email = config.receiver_email_manual
-    elif mode == "auto":
-        receivers_email = config.receiver_email_auto
+    attr = f"receiver_email_{mode}"
+    if hasattr(config, attr):
+        receivers_email = getattr(config, attr)
     else:
         raise(Exception("mail: Unknown mode"))
 

@@ -184,10 +184,15 @@ class Winamax():
         for match_id in http.data["matches"]:
             #if str(match["tournamentId"]) == str(tournament_id):
                 match = http.data["matches"][match_id]
-                if self.check_match(match_id):
-                    self.send_match_notification(match_id=match_id, mode="auto")
-                    match["marked"] = True
-                    db.update_match(match)
+               
+                db_match = self.get_match(match_id)
+                for check in Winamax.checks:
+                    check_name = check["name"]
+                    if not check_name in db_match.get("marks"):
+                        if self.check_match(match_id, check):
+                            self.send_match_notification(match_id=match_id, mode=f"auto_{check_name}")
+                            match["new_mark"] = check_name
+                            db.update_match(match)
 
     def delete_match(self, http,  match_id):
         bet = http.get("bets", match_id)
@@ -206,8 +211,11 @@ class Winamax():
 
     def get_match(self, match_id):
         with self.Session() as session:
-             match = session.query(db.Match).filter_by(match_id=match_id).one()
-             return self.serialize_match(match)
+            try:
+                match = session.query(db.Match).filter_by(match_id=match_id).one()
+            except:
+                return None
+            return self.serialize_match(match)
 
     def serialize_match(self, db_match):
         match =  json.loads(db_match.value)
@@ -215,7 +223,7 @@ class Winamax():
         match["category"] = self.get_category(match["sportId"], match["categoryId"])
         match["tournament"] = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
         match["status"] = db_match.status
-        match["marked"] = db_match.marked
+        match["marks"] = db_match.marks
 
         return match
 
@@ -251,8 +259,7 @@ class Winamax():
         utils.send_mail(subject, message, mode=mode)
         return { "result": "ok"}
 
-    def check_outcome(self, outcome_id):
-        log(f"Checking outcome {outcome_id}")
+    def get_first_and_last_odds(self, outcome_id):
         history = self.get_outcome_history(outcome_id)
         last = None
         first = None
@@ -265,9 +272,15 @@ class Winamax():
                 break
         if not first or not last:
             log(f"- No data")
+            return (None, None)
+        return (first.get("data").get("odds"), last.get("data").get("odds"))
+        
+
+    def check_outcome_cote_drop(self, outcome_id):
+        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
+        if not first_odds:
             return False
-        first_odds = first.get("data").get("odds")
-        last_odds = last.get("data").get("odds")
+
         if first_odds < 1 or first_odds > 10:
             log(f"- Bad odds: {first_odds}")
             return False
@@ -278,7 +291,18 @@ class Winamax():
             return False            
 
         return True
-    
+
+    def check_outcome_cote_low(self, outcome_id):
+        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
+        if not first_odds:
+            return False
+
+        if first_odds > 1.2 and last_odds <= 1.2:
+            return True
+
+        log(f"- No breakthrough: {first_odds} {last_odds}")
+        return False
+
     def matchInfo(self, match):
         res = str(match["matchId"])
         def add(t):
@@ -293,39 +317,69 @@ class Winamax():
         res = f'{res} - {match["competitor1Name"]} - {match["competitor2Name"]}'
         return res
 
-    def check_match(self, match_id):
-        match = self.get_match(match_id)
-        if match.get("marked"):
-            return False
+    def check_match(self, match, config):
+        if (type(match) in [int, str]):
+            match = self.get_match(match)
+
         match_start = match.get("matchStart")
         now = datetime.now()
         timestamp = datetime.timestamp(now)
-        log(f"Checking match {self.matchInfo(match)}")
+        log(f"Checking match for {config['name']} {self.matchInfo(match)}")
         if not match.get('bet') or not match.get('bet').get('outcomes'):
             log(f" - no outcome")
             return False
-        if match_start - timestamp < 60 * 10:
-            log(f" - too late")
-            return False
-        if match_start - timestamp > 60 * 30:
+
+        if timestamp - match_start < config["starts"] * 60:
             log(f" - too soon")
             return False
+        
+        if timestamp - match_start > config["ends"] * 60:
+            log(f" - too late")
+            return False
+
         for outcome_id in match.get('bet').get('outcomes'):
-            if self.check_outcome(outcome_id):
+            func = getattr(self, f"check_outcome_{config['name']}")
+            log(f"Checking outcome {config['name']} {outcome_id}")
+        
+            if func(outcome_id):
                 return True
         return False
 
     def purge(self):
         matches = self.get_matches()
+        known_outcomes = []
         now = datetime.now()
         timestamp = datetime.timestamp(now)
         http = HttpStatic()
         for match in matches:
+            try:
+                known_outcomes += match.get('bet').get('outcomes')
+            except:
+                pass
             tournament = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
             if not tournament:
                 self.delete_match(http, match["matchId"])
+        
+        finished = False
+        while not finished:
+            finished = True
+            for outcome in db.get_outcomes():
+                if outcome.outcome_id not in known_outcomes:
+                    print(outcome.outcome_id)
+                    db.delete_outcome_history(outcome.outcome_id)
+                    finished = False
 
     
     def test(self):
         http = Http("/1/44/207")
         http.get_remote_data()
+
+Winamax.checks = [ {
+    "name": "cote_drop",
+    "starts": -30,
+    "ends": -10,
+}, {
+    "name": "cote_low",
+    "starts": 0,
+    "ends": 240,
+}]
