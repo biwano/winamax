@@ -39,7 +39,6 @@ class Match(Base):
         marks = self._marks
         if not marks:
             marks = "[]"
-        print(type(marks), f'"{marks}"', json.loads(marks))
         return json.loads(marks)
     
     @marks.setter

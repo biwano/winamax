@@ -9,6 +9,9 @@ from seleniumwire.utils import decode
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from . import config
+from re import sub
+from decimal import Decimal
+from selenium.webdriver.common.action_chains import ActionChains
 
 from . import db
 
@@ -25,7 +28,7 @@ class Http():
     def driver(self):
         if not self._driver:
             chrome_options = Options()
-            chrome_options.add_argument("--window-size=800,600")
+            chrome_options.add_argument("--window-size=1024,768")
             chrome_options.add_experimental_option("detach", True)
             if config.selenium_headless:
                 chrome_options.add_argument("--headless")
@@ -72,11 +75,15 @@ class Http():
     def click(self, elem):
         self.driver.execute_script("arguments[0].click();",elem)
 
+    def input(self, placeholder, value):
+        login = self.driver.find_element(By.XPATH, f"//input[starts-with(@placeholder, '{placeholder}')]")
+        login.send_keys(value)
+
 
     def bet(self, match, outcome):
-        print(json.dumps(match, indent=1))
-        print(json.dumps(outcome, indent=1))
         match_id = match.get("matchId")
+        label = outcome.get("label")
+        
         self.driver.get("https://www.winamax.fr/account/login.php?redir=/")
 
         # cookie button
@@ -89,20 +96,73 @@ class Http():
         self.driver.switch_to.frame(iframe);
         
         # username 
-        login = self.driver.find_element(By.XPATH, "//input[starts-with(@placeholder, 'Email')]")
-        login.send_keys(config.winamax_login)
+        self.input('Email', config.winamax_login)
 
         # password
-        password = self.driver.find_element(By.XPATH, "//input[starts-with(@placeholder, 'Mot de passe')]")
-        password.send_keys(config.winamax_password)
+        self.input('Mot de passe', config.winamax_password)
 
         # login button
         submit = self.driver.find_element(By.XPATH, "//button[@type='submit']")
         self.click(submit)
 
+        # jour de naissance
+        self.input('JJ', "15")
+        self.input('MM', "12")
+        self.input('AAAA', "1982")
+
+        # login button
+        submit = self.driver.find_element(By.XPATH, "//button[@type='submit']")
+        self.click(submit)
+
+        # Wait connexion
+        self.driver.find_element(By.ID, "carrousel-container")
+
         # match page
         self.driver.get(f"https://www.winamax.fr/paris-sportifs/match/{match_id}")
+
+        # Tempraire
+        try:
+            tmp = self.driver.find_element(By.XPATH, "//button[text()='Fermer']")
+            self.click(tmp)
+        except:
+            pass
+
+        # solde
+        solde_elem = self.driver.find_element(By.XPATH, "//div[@id='money-block']/div[@class='value']")
+        solde_str = solde_elem.text
+        solde = Decimal(sub(r'[^\d.]', '', solde_str)) / 100
+        bet_amount = solde /1000
         
+
+
+        
+        # Outcome button
+        sleep(1)
+        outcome_button = self.driver.find_element(By.XPATH, f"//div[contains(@class, 'bet-group-outcome-odd') and div/div='{label}']")
+        #self.click(outcome_button)
+        ac = ActionChains(self.driver)
+        ac.move_to_element(outcome_button).move_by_offset(10, 10).click().perform()
+
+        # Bet tab
+        bet_tab = self.driver.find_element(By.XPATH, "//div[@data-testid='sticky-wrap']")
+        
+        # Simple bet
+        simple_bet = bet_tab.find_element(By.XPATH, "//div[contains(text(), 'Simple')]")
+        self.click(simple_bet)
+
+        # Bet amount
+        amount_input = bet_tab.find_element(By.TAG_NAME, "input")
+        self.driver.execute_script(f"arguments[0].value='';",amount_input)
+        amount_input.send_keys(str(bet_amount))
+
+        # Bet button
+        bet_button = bet_tab.find_element(By.TAG_NAME, "button")
+        bet_button.click()
+
+
+        sleep(50)
+      
+       
 
 
 
