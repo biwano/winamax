@@ -206,8 +206,15 @@ class Winamax():
 
     def get_matches(self, params={}):
         with self.Session() as session:
-             matches = session.query(db.Match).filter_by(**params).order_by("match_start").all()
-             return [ self.serialize_match(match) for match in matches ]
+            mark = None
+            if "mark" in params:
+                mark = params["mark"]
+                del params["mark"]
+            matches = session.query(db.Match).filter_by(**params)
+            if mark:
+                matches = matches.filter(db.Match._marks.contains(mark))
+            matches = matches.order_by("match_start").all()
+            return [ self.serialize_match(match) for match in matches ]
 
     def get_match(self, match_id):
         with self.Session() as session:

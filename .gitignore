@@ -8,5 +8,8 @@ db.sqlite
 web
 config.py
 *.log
+*.logs
 *.old
 output
+app.wsgi
+error.txt
