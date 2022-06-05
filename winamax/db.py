@@ -38,7 +38,8 @@ class Match(Base):
     def marks(self):
         marks = self._marks
         if not marks:
-            marks = json.dumps([])
+            marks = "[]"
+        print(type(marks), f'"{marks}"', json.loads(marks))
         return json.loads(marks)
     
     @marks.setter
@@ -120,7 +121,7 @@ def update_match(match):
               tournament_id=match["tournamentId"],
               match_start=match["matchStart"],
               status=match["status"],
-              marks = json.dumps([])
+              _marks=json.dumps([])
               )
             session.add(db_match)
         db_match.value = json.dumps(match)

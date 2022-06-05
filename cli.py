@@ -11,6 +11,7 @@ parser.add_argument("--sport_id", default=None)
 parser.add_argument("--category_id", default=None)
 parser.add_argument("--tournament_id", default=None)
 parser.add_argument("--match_id", default=None)
+parser.add_argument("--outcome_id", default=None)
 
 args = parser.parse_args()
 
@@ -31,6 +32,9 @@ class Cli:
 
     def check_match(self, **kwargs):
         print(self.winamax.check_match(args.match_id, Winamax.checks[1]))
+
+    def bet(self, **kwargs):
+        print(self.winamax.bet(args.outcome_id))
 
     def send_mail(self):
         utils.send_mail("coucou", 

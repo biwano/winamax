@@ -50,7 +50,7 @@ def send_mail(subject, body, mode):
     if hasattr(config, attr):
         receivers_email = getattr(config, attr)
     else:
-        raise(Exception("mail: Unknown mode"))
+        raise(Exception(f"mail: Unknown mode: {mode}"))
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject

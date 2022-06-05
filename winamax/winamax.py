@@ -293,7 +293,7 @@ class Winamax():
             return False
 
         diff = (first_odds - last_odds) / first_odds
-        if abs(diff) < 0.05:
+        if diff < 0.05:
             log(f"- Weak variation: {diff}")
             return False            
 
@@ -375,6 +375,19 @@ class Winamax():
                     print(outcome.outcome_id)
                     db.delete_outcome_history(outcome.outcome_id)
                     finished = False
+
+    def bet(self, outcome_id):
+        matches = self.get_matches()
+        http = Http()
+        for match in matches:
+            if match.get("bet") and match.get("bet").get("outcomes"):
+                if int(outcome_id) in match.get("bet").get("outcomes"):
+                    outcome = self.get_outcome(outcome_id)
+                    http.bet(match, outcome)
+                    break
+
+
+
 
     
     def test(self):
