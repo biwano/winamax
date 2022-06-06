@@ -3,7 +3,7 @@
     <span class="lead">{{ title }}</span
     ><br />
     <span v-show="matches.length == 0">Aucun match</span>
-    <ul class="nav nav-pills">
+    <ul class="nav nav-pills  flex-column">
       <li v-for="match in matches" :key="match.matchId" class="nav-item">
         <a
           href="javascript:;"
