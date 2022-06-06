@@ -190,9 +190,10 @@ class Winamax():
                     check_name = check["name"]
                     if not check_name in db_match.get("marks"):
                         if self.check_match(match_id, check):
-                            self.send_match_notification(match_id=match_id, mode=f"auto_{check_name}")
-                            match["new_mark"] = check_name
-                            db.update_match(match)
+                            if not config.debug_outcome_checks:
+                                self.send_match_notification(match_id=match_id, mode=f"auto_{check_name}")
+                                match["new_mark"] = check_name
+                                db.update_match(match)
 
     def delete_match(self, http,  match_id):
         bet = http.get("bets", match_id)
@@ -268,6 +269,7 @@ class Winamax():
 
     def get_first_and_last_odds(self, outcome_id):
         history = self.get_outcome_history(outcome_id)
+        outcome = self.get_outcome(outcome_id)
         last = None
         first = None
         history.reverse()
@@ -277,15 +279,15 @@ class Winamax():
             first = dot
             if last.get("time") - first.get("time") > 15 * 60:
                 break
-        if not first or not last:
+        if not first or not last or not outcome:
             log(f"- No data")
-            return (None, None)
-        return (first.get("data").get("odds"), last.get("data").get("odds"))
+            return (None, None, None)
+        return (first.get("data").get("odds"), last.get("data").get("odds"), outcome)
         
 
-    def check_outcome_cote_drop(self, outcome_id):
-        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
-        if not first_odds:
+    def check_outcome_cote_drop(self, match, outcome_id):
+        (first_odds, last_odds, outcome) = self.get_first_and_last_odds(outcome_id)
+        if not outcome:
             return False
 
         if first_odds < 1 or first_odds > 10:
@@ -294,32 +296,43 @@ class Winamax():
 
         diff = (first_odds - last_odds) / first_odds
         if diff < 0.05:
-            log(f"- Weak variation: {diff}")
+            log(f"- Weak odds variation: {diff}")
             return False            
 
         return True
 
-    def check_outcome_cote_low(self, outcome_id):
-        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
-        if not first_odds:
+    def check_outcome_cote_low(self, match, outcome_id):
+        (first_odds, last_odds, outcome) = self.get_first_and_last_odds(outcome_id)
+        if not outcome:
             return False
 
         if first_odds > 1.2 and last_odds <= 1.2:
             return True
 
-        log(f"- No breakthrough: {first_odds} {last_odds}")
+        log(f"- Bad odds: {first_odds} {last_odds}")
         return False
 
-    def check_outcome_cote_bet(self, outcome_id):
-        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
-        if not first_odds:
+    def check_outcome_cote_bet(self, match, outcome_id):
+        (first_odds, last_odds, outcome) = self.get_first_and_last_odds(outcome_id)
+        if not outcome:
             return False
 
-        if first_odds > 1.2 and last_odds <= 1.2:
-            self.bet(outcome_id)
+        label = outcome.get("label")
+        if label == "Match nul":
+            log(f"- Bad outcome: {label}")
+            return False
+
+        sport_id = match.get("sportId")
+        if str(sport_id) != str(1):
+            log(f"- Bad sport: {sport_id}")
+            return False
+
+        if first_odds > 1.2 and last_odds <= 1.2 and last_odds > 1.05:
+            if not config.debug_outcome_checks:
+                self.bet(outcome_id)
             return True
 
-        log(f"- No breakthrough: {first_odds} {last_odds}")
+        log(f"- Bad odds: {first_odds} {last_odds}")
         return False
 
     def matchInfo(self, match):
@@ -336,31 +349,31 @@ class Winamax():
         res = f'{res} - {match["competitor1Name"]} - {match["competitor2Name"]}'
         return res
 
-    def check_match(self, match, config):
+    def check_match(self, match, check_config):
         if (type(match) in [int, str]):
             match = self.get_match(match)
 
         match_start = match.get("matchStart")
         now = datetime.now()
         timestamp = datetime.timestamp(now)
-        log(f"Checking match for {config['name']} {self.matchInfo(match)}")
+        log(f"Checking match for {check_config['name']} {self.matchInfo(match)}")
         if not match.get('bet') or not match.get('bet').get('outcomes'):
             log(f" - no outcome")
             return False
-
-        if timestamp - match_start < config["starts"] * 60:
-            log(f" - too soon")
-            return False
-        
-        if timestamp - match_start > config["ends"] * 60:
-            log(f" - too late")
-            return False
+        if not config.debug_outcome_checks:
+            if timestamp - match_start < check_config["starts"] * 60:
+                log(f" - too soon")
+                return False
+            
+            if timestamp - match_start > check_config["ends"] * 60:
+                log(f" - too late")
+                return False
 
         for outcome_id in match.get('bet').get('outcomes'):
-            func = getattr(self, f"check_outcome_{config['name']}")
-            log(f"Checking outcome {config['name']} {outcome_id}")
+            func = getattr(self, f"check_outcome_{check_config['name']}")
+            log(f"Checking outcome {check_config['name']} {outcome_id}")
         
-            if func(outcome_id):
+            if func(match, outcome_id):
                 return True
         return False
 
