@@ -124,7 +124,8 @@ def update_match(match):
               )
             session.add(db_match)
         db_match.value = json.dumps(match)
-        db_match.status = match.get("status")
+        db_match.status = match["status"]
+        db_match.match_start = match["matchStart"]
         new_mark = match.get("new_mark")
         if new_mark:
             marks = db_match.marks
