@@ -194,6 +194,13 @@ class Winamax():
                                 self.send_match_notification(match_id=match_id, mode=f"auto_{check_name}")
                                 match["new_mark"] = check_name
                                 db.update_match(match)
+    
+    def delete_match_marks(self, match_id):
+        http = HttpStatic()
+        match = http.data["matches"][match_id]
+        match["delete_marks"] = True
+        db.update_match(match)
+        
 
     def delete_match(self, http,  match_id):
         bet = http.get("bets", match_id)
@@ -280,9 +287,9 @@ class Winamax():
             if not last:
                 last = dot
             first = dot
-            if last.get("time") - first.get("time") > 15 * 60:
+            if last.get("time") - first.get("time") > 120 * 60:
                 break
-        if not first or not last or not outcome:
+        if not outcome or not first or not last or not first.get("data").get("odds") or not last.get("data").get("odds"):
             log(f"- No data")
             return (None, None, None)
         return (first.get("data").get("odds"), last.get("data").get("odds"), outcome)
@@ -425,6 +432,13 @@ class Winamax():
         http = Http("/1/44/207")
         http.get_remote_data()
 
+    @staticmethod
+    def get_check(check_id):
+        for check in Winamax.checks:
+            if check["name"] == check_id:
+                return check
+
+
 Winamax.checks = [ {
     "name": "cote_drop",
     "starts": -30,
@@ -438,3 +452,5 @@ Winamax.checks = [ {
     "starts": 84,
     "ends": 290,
 }]
+
+

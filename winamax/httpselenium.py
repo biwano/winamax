@@ -29,7 +29,7 @@ class Http():
         if not self._driver:
             chrome_options = Options()
             chrome_options.add_argument("--window-size=1024,768")
-            chrome_options.add_experimental_option("detach", True)
+            #chrome_options.add_experimental_option("detach", True)
             if config.selenium_headless:
                 chrome_options.add_argument("--headless")
 

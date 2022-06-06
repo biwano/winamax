@@ -131,6 +131,8 @@ def update_match(match):
             if not new_mark in marks:
                 marks.append(new_mark)
                 db_match.marks = marks
+        if match.get("delete_marks"):
+            db_match.marks = []
 
 def delete_match(match_id):
     with Session()() as session:
