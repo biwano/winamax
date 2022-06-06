@@ -1,7 +1,7 @@
 <template>
   <div>
     <app-nav></app-nav>
-    <div class="container">
+    <div class="container-fluid">
       <div class="row">
         <div class="col-md-4">
           <matches-list

@@ -16,6 +16,9 @@
         >
           {{ label(match) }}
           <br />
+          <MatchExtraInfo v-if="with_extra_info" :match="match">
+            ></MatchExtraInfo
+          >
           <MatchMarks :match="match"></MatchMarks>
         </a>
       </li>
@@ -26,11 +29,13 @@
 <script>
 import winamax_mixin from "@/winamax_mixin";
 import MatchMarks from "@/components/MatchMarks";
+import MatchExtraInfo from "@/components/MatchExtraInfo";
+
 export default {
   name: "MatchesList",
   mixins: [winamax_mixin],
-  props: ["query", "input_match_id", "title"],
-  components: { MatchMarks },
+  props: ["query", "input_match_id", "title", "with_extra_info"],
+  components: { MatchMarks, MatchExtraInfo },
   data() {
     return {
       matches: [],

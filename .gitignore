@@ -13,3 +13,5 @@ config.py
 output
 app.wsgi
 error.txt
+*.code-workspace
+config.js
