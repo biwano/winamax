@@ -246,10 +246,13 @@ class Winamax():
             return [ self.serialize_history(h) for h in histories.all() ]
 
     def serialize_history(self, history):
-        return {
-            "time": history.time,
-            "data": json.loads(history.data),
-        }
+        if history:
+            return {
+                "time": history.time,
+                "data": json.loads(history.data),
+            }
+        else:
+            return None
 
     def get_logs(self, nb_lines=50):
         logs = utils.get_last_n_lines('db.log', nb_lines)
@@ -327,7 +330,7 @@ class Winamax():
             log(f"- Bad sport: {sport_id}")
             return False
 
-        if first_odds > 1.2 and last_odds <= 1.2 and last_odds > 1.05:
+        if first_odds > 1.3 and last_odds <= 1.3 and last_odds > 1.05:
             if not config.debug_outcome_checks:
                 self.bet(outcome_id)
             return True
@@ -361,12 +364,15 @@ class Winamax():
             log(f" - no outcome")
             return False
         if not config.debug_outcome_checks:
-            if timestamp - match_start < check_config["starts"] * 60:
-                log(f" - too soon")
+            started_since = timestamp - match_start
+            starts = check_config["starts"]
+            ends = check_config["ends"]
+            if started_since < check_config["starts"] * 60:
+                log(f" - too soon {started_since} - {starts}")
                 return False
             
-            if timestamp - match_start > check_config["ends"] * 60:
-                log(f" - too late")
+            if started_since > check_config["ends"] * 60:
+                log(f' - too late {started_since} - {ends}')
                 return False
 
         for outcome_id in match.get('bet').get('outcomes'):
@@ -430,5 +436,5 @@ Winamax.checks = [ {
 }, {
     "name": "cote_bet",
     "starts": 84,
-    "ends": 90,
+    "ends": 290,
 }]
