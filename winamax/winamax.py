@@ -417,5 +417,5 @@ Winamax.checks = [ {
 }, {
     "name": "cote_bet",
     "starts": 84,
-    "ends": 240,
+    "ends": 90,
 }]
