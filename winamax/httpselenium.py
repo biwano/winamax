@@ -157,8 +157,9 @@ class Http():
         amount_input.send_keys(str(bet_amount))
 
         # Bet button
-        bet_button = bet_tab.find_element(By.TAG_NAME, "button")
-        bet_button.click()
+        if config.winamax_bet:
+            bet_button = bet_tab.find_element(By.TAG_NAME, "button")
+            bet_button.click()
 
 
         sleep(50)
