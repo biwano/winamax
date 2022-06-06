@@ -115,6 +115,7 @@ class Http():
         self.click(submit)
 
         # Wait connexion
+        self.driver.switch_to.default_content()
         self.driver.find_element(By.ID, "carrousel-container")
 
         # match page
