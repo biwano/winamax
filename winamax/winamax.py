@@ -310,6 +310,18 @@ class Winamax():
         log(f"- No breakthrough: {first_odds} {last_odds}")
         return False
 
+    def check_outcome_cote_bet(self, outcome_id):
+        (first_odds, last_odds) = self.get_first_and_last_odds(outcome_id)
+        if not first_odds:
+            return False
+
+        if first_odds > 1.2 and last_odds <= 1.2:
+            self.bet(outcome_id)
+            return True
+
+        log(f"- No breakthrough: {first_odds} {last_odds}")
+        return False
+
     def matchInfo(self, match):
         res = str(match["matchId"])
         def add(t):
@@ -401,5 +413,9 @@ Winamax.checks = [ {
 }, {
     "name": "cote_low",
     "starts": 0,
+    "ends": 240,
+}, {
+    "name": "cote_bet",
+    "starts": 84,
     "ends": 240,
 }]
