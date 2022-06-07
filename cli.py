@@ -12,6 +12,7 @@ parser.add_argument("--category_id", default=None)
 parser.add_argument("--tournament_id", default=None)
 parser.add_argument("--match_id", default=None)
 parser.add_argument("--outcome_id", default=None)
+parser.add_argument("--check_id", default=None)
 
 args = parser.parse_args()
 
@@ -31,7 +32,10 @@ class Cli:
         self.winamax.update_tournament(args.sport_id, args.category_id, args.tournament_id)
 
     def check_match(self, **kwargs):
-        print(self.winamax.check_match(args.match_id, Winamax.checks[1]))
+        print(self.winamax.check_match(args.match_id, Winamax.get_check(args.check_id)))
+
+    def delete_match_marks(self, **kwargs):
+        print(self.winamax.delete_match_marks(args.match_id))
 
     def bet(self, **kwargs):
         print(self.winamax.bet(args.outcome_id))

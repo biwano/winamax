@@ -316,6 +316,11 @@ class Winamax():
         if not outcome:
             return False
 
+        sport_id = match.get("sportId")
+        if str(sport_id) != str(1):
+            log(f"- Bad sport: {sport_id}")
+            return False
+
         if first_odds > 1.2 and last_odds <= 1.2:
             return True
 
@@ -372,13 +377,14 @@ class Winamax():
             return False
         if not config.debug_outcome_checks:
             started_since = timestamp - match_start
-            starts = check_config["starts"]
-            ends = check_config["ends"]
-            if started_since < check_config["starts"] * 60:
+            starts = check_config["starts"] * 60
+            ends = check_config["ends"] * 60
+            log(f" - too soon {timestamp} - {match_start}")
+            if started_since < check_config["starts"]:
                 log(f" - too soon {started_since} - {starts}")
                 return False
             
-            if started_since > check_config["ends"] * 60:
+            if started_since > check_config["ends"]:
                 log(f' - too late {started_since} - {ends}')
                 return False
 
@@ -449,8 +455,8 @@ Winamax.checks = [ {
     "ends": 240,
 }, {
     "name": "cote_bet",
-    "starts": 84,
-    "ends": 290,
+    "starts": 87 + 15,
+    "ends": 87 + 15,
 }]
 
 
