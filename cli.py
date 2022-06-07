@@ -12,7 +12,7 @@ parser.add_argument("--category_id", default=None)
 parser.add_argument("--tournament_id", default=None)
 parser.add_argument("--match_id", default=None)
 parser.add_argument("--outcome_id", default=None)
-parser.add_argument("--check_id", default=None)
+parser.add_argument("--check_id", default="cote_bet")
 
 args = parser.parse_args()
 

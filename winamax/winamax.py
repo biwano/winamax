@@ -386,12 +386,11 @@ class Winamax():
             started_since = timestamp - match_start
             starts = check_config["starts"] * 60
             ends = check_config["ends"] * 60
-            log(f" - too soon {timestamp} - {match_start}")
-            if started_since < check_config["starts"]:
+            if started_since < starts:
                 log(f" - too soon {started_since} - {starts}")
                 return False
             
-            if started_since > check_config["ends"]:
+            if started_since > ends:
                 log(f' - too late {started_since} - {ends}')
                 return False
 
@@ -462,8 +461,8 @@ Winamax.checks = [ {
     "ends": 240,
 }, {
     "name": "cote_bet",
-    "starts": 87 + 15,
-    "ends": 87 + 15,
+    "starts": 45 + 15,
+    "ends": 90 + 15,
 }]
 
 
