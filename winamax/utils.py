@@ -42,10 +42,10 @@ def get_last_n_lines(file_name, N):
     return list(list_of_lines)
 
 def send_mail(subject, body, mode):
-    port = 465  # For SSL
+    port = 465 
     
     # Create a secure SSL context
-    sender_email = config.sender_email
+    sender_email = config.smtp_sender_email
     attr = f"receiver_email_{mode}"
     if hasattr(config, attr):
         receivers_email = getattr(config, attr)
@@ -61,8 +61,8 @@ def send_mail(subject, body, mode):
     message.attach(part1)
     context = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-        server.login(sender_email, config.sender_password)
+    with smtplib.SMTP_SSL(config.smtp_server, port, context=context) as server:
+        server.login(config.smtp_api_key, config.smtp_api_secret)
         server.sendmail(
             sender_email, receivers_email.split(","), message.as_string()
         )
