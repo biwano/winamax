@@ -132,7 +132,7 @@ class Http():
         solde_elem = self.driver.find_element(By.XPATH, "//div[@id='money-block']/div[@class='value']")
         solde_str = solde_elem.text
         solde = Decimal(sub(r'[^\d.]', '', solde_str)) / 100
-        bet_amount = solde /1000
+        bet_amount = min(solde /1000, 0.1)
         
 
 
