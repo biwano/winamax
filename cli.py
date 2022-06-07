@@ -42,7 +42,7 @@ class Cli:
             Coucou
 
             Hello lala
-        """)
+        """, "auto_cote_bet")
 
     def test(self, **kwargs):
         self.winamax.test()

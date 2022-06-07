@@ -2,6 +2,7 @@ import requests
 import re
 import json
 import os
+import traceback
 from datetime import datetime
 from http.cookiejar import LWPCookieJar
 import copy
@@ -332,8 +333,14 @@ class Winamax():
 
         if first_odds > 1.3 and last_odds <= 1.3 and last_odds > 1.05:
             if not config.debug_outcome_checks:
-                self.bet(outcome_id)
-            return True
+                try:
+                    self.bet(outcome_id)
+                    return True
+                except:
+                    traceback.print_exc()
+                    return False
+            else:
+                return True
 
         log(f"- Bad odds: {first_odds} {last_odds}")
         return False
