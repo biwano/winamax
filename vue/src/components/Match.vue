@@ -16,7 +16,7 @@
       <div>
         <span class="lead"
           >{{ match.competitor1Name }} - {{ match.competitor2Name }}</span
-        ><br />
+        ><Clipboard :text="match.matchId"></Clipboard><br />
         &nbsp; <MatchExtraInfo :match="match"></MatchExtraInfo>
         <br />
         <i class="fas fa-calendar"></i>&nbsp;{{ date(match.matchStart) }}
@@ -55,12 +55,13 @@ import winamax_mixin from "@/winamax_mixin";
 import Outcome from "@/components/Outcome.vue";
 import MatchMarks from "@/components/MatchMarks";
 import MatchExtraInfo from "@/components/MatchExtraInfo";
+import Clipboard from "@/components/Clipboard";
 import { scales } from "@/components/Outcome.vue";
 export default {
   name: "Match",
   mixins: [winamax_mixin],
   props: ["match_id"],
-  components: { Outcome, MatchMarks, MatchExtraInfo },
+  components: { Outcome, MatchMarks, MatchExtraInfo, Clipboard },
   data() {
     return {
       match: [],
