@@ -81,6 +81,7 @@ class Http():
 
 
     def bet(self, match, outcome):
+        return
         match_id = match.get("matchId")
         label = outcome.get("label")
         
@@ -162,7 +163,7 @@ class Http():
             bet_button.click()
 
 
-        sleep(50)
+        #sleep(50)
       
        
 

@@ -1,16 +1,9 @@
-import requests
-import re
 import json
-import os
 import traceback
 from datetime import datetime
-from http.cookiejar import LWPCookieJar
-import copy
 from . import db
 from .httpselenium import Http
 from .http import Http as HttpStatic
-from .browser import Browser
-import time
 from . import utils
 from . import config
 from datetime import datetime
@@ -89,6 +82,7 @@ class Winamax():
                 res_category = {"id": category_id, "name": category["categoryName"], "tournaments": []}
                 res_sport["categories"].append(res_category)
                 for tournament_id in category["tournaments"]:
+                    print(tournament_id)
                     tournament = http.get("tournaments", tournament_id)
                     res_tournament = {"id": tournament_id, "name": tournament["tournamentName"],
                     "suffix": f"{sport_id}/{category_id}/{tournament_id}",
@@ -348,8 +342,9 @@ class Winamax():
                 try:
                     self.bet(outcome_id)
                     return True
-                except:
+                except Exception as e:
                     traceback.print_exc()
+                    log(f"Error {e}")
                     return False
             else:
                 return True
@@ -409,13 +404,14 @@ class Winamax():
         timestamp = datetime.timestamp(now)
         http = HttpStatic()
         for match in matches:
-            try:
-                known_outcomes += match.get('bet').get('outcomes')
-            except:
-                pass
             tournament = self.get_tournament(match["sportId"], match["categoryId"], match["tournamentId"])
             if not tournament:
                 self.delete_match(http, match["matchId"])
+            else:
+                try:
+                    known_outcomes += match.get('bet').get('outcomes')
+                except:
+                    pass
         
         finished = False
         while not finished:

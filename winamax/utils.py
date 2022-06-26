@@ -52,6 +52,9 @@ def send_mail(subject, body, mode):
     else:
         raise(Exception(f"mail: Unknown mode: {mode}"))
 
+    if not receivers_email:
+        return
+
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = sender_email
