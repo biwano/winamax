@@ -82,8 +82,8 @@ class Winamax():
                 res_category = {"id": category_id, "name": category["categoryName"], "tournaments": []}
                 res_sport["categories"].append(res_category)
                 for tournament_id in category["tournaments"]:
-                    print(tournament_id)
                     tournament = http.get("tournaments", tournament_id)
+                    print(sport["sportName"]+ " - " + tournament["tournamentName"] + " - " + category["categoryName"])
                     res_tournament = {"id": tournament_id, "name": tournament["tournamentName"],
                     "suffix": f"{sport_id}/{category_id}/{tournament_id}",
                     "sportId": sport_id,
@@ -328,9 +328,11 @@ class Winamax():
             return False
 
         label = outcome.get("label")
+        """
         if label == "Match nul":
             log(f"- Bad outcome: {label}")
             return False
+        """
 
         sport_id = match.get("sportId")
         if str(sport_id) != str(1):
@@ -457,7 +459,7 @@ Winamax.checks = [ {
     "ends": 240,
 }, {
     "name": "cote_bet",
-    "starts": 45 + 15,
+    "starts": 75 + 15,
     "ends": 90 + 15,
 }]
 

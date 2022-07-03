@@ -19,10 +19,24 @@ class Http():
             res = {}
         return res
 
+    """
     def get_remote_data(self):
         url = f"https://www.winamax.fr/paris-sportifs/sports{self.suffix}"
         response = requests.get(url)
         suffix = self.suffix.replace("/", ".")
+        return self.extract(response.text)
+    """
+
+    def get_remote_data(self):
+        destination = f"https://www.winamax.fr/paris-sportifs/sports{self.suffix}"
+        url = "https://nl.hideproxy.me/includes/process.php?action=update"
+        response = requests.post(url, data={
+            "u": destination,
+            "go": "",
+            "proxy_formdata_server": "nl",
+            "allowCookies": 1,
+            "encodeURL": 1,
+        })
         return self.extract(response.text)
 
     @property
