@@ -56,7 +56,7 @@ def send_mail(subject, body, mode):
         return
 
     message = MIMEMultipart("alternative")
-    message["Subject"] = subject
+    message["Subject"] = f"Winabiwa: {subject}"
     message["From"] = sender_email
     message["To"] = receivers_email
 

@@ -41,12 +41,12 @@ class Cli:
         print(self.winamax.bet(args.outcome_id))
 
     def send_mail(self):
-        utils.send_mail("coucou", 
+        utils.send_mail("Test", 
             """
             Coucou
 
             Hello lala
-        """, "auto_cote_bet")
+        """, "auto_cote_trend")
 
     def test(self, **kwargs):
         self.winamax.test()

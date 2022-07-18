@@ -354,6 +354,23 @@ class Winamax():
         log(f"- Bad odds: {first_odds} {last_odds}")
         return False
 
+    def check_outcome_cote_trend(self, match, outcome_id):
+        (first_odds, last_odds, outcome) = self.get_first_and_last_odds(outcome_id)
+        if not outcome:
+            return False
+
+        label = outcome.get("label")
+        if label == "Match nul":
+            log(f"- Bad outcome: {label}")
+            return False
+
+        percentDistribution = outcome.get("percentDistribution")
+        if outcome.get("percentDistribution") <= 96:
+            log(f"- Bad distribution: {percentDistribution} <= 96")
+            return False
+        
+        return True
+
     def matchInfo(self, match):
         res = str(match["matchId"])
         def add(t):
@@ -458,9 +475,13 @@ Winamax.checks = [ {
     "starts": 0,
     "ends": 240,
 }, {
-    "name": "cote_bet",
-    "starts": 75 + 15,
-    "ends": 90 + 15,
+   # "name": "cote_bet",
+   # "starts": 75 + 15,
+   # "ends": 90 + 15,
+#}, {
+    "name": "cote_trend",
+    "starts": -6000,
+    "ends": 0,
 }]
 
 
