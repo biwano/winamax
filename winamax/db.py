@@ -11,7 +11,7 @@ import logging
 Base = declarative_base()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler('db.log')
+fh = logging.FileHandler('logs/db.log')
 fh.setLevel(level=logging.DEBUG)
 logger.addHandler(fh)
 

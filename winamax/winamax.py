@@ -364,9 +364,18 @@ class Winamax():
             log(f"- Bad outcome: {label}")
             return False
 
+        sport_id = match.get("sportId")
+        if str(sport_id) in ["5"]:
+            log(f"- Bad sport: {sport_id}")
+            return False
+
         percentDistribution = outcome.get("percentDistribution")
-        if outcome.get("percentDistribution") <= 96:
-            log(f"- Bad distribution: {percentDistribution} <= 96")
+        if outcome.get("percentDistribution") < 99:
+            log(f"- Bad distribution: {percentDistribution} < 100")
+            return False
+
+        if last_odds < 1.5:
+            log(f"- Bad odds: {last_odds} < 1.5")
             return False
         
         return True
@@ -480,7 +489,7 @@ Winamax.checks = [ {
    # "ends": 90 + 15,
 #}, {
     "name": "cote_trend",
-    "starts": -6000,
+    "starts": -5760,
     "ends": 0,
 }]
 

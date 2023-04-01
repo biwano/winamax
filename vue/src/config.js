@@ -1,3 +1,3 @@
 export default {
-	endpoint: "http://localhost:5000"
+	endpoint: "http://winamax.ilponse.com/api"
 }

@@ -5,6 +5,7 @@ import Embed from '../views/Embed.vue'
 import Dashboard from '../views/Dashboard.vue'
 import NextMatches from '../views/NextMatches.vue'
 import MarkedMatches from '../views/MarkedMatches.vue'
+import LiveMatches from '../views/LiveMatches.vue'
 
 
 Vue.use(VueRouter)
@@ -39,6 +40,11 @@ const routes = [
     path: '/next_matches',
     name: 'NextMatches',
     component: NextMatches
+  },
+  {
+    path: '/live_matches',
+    name: 'LiveMatches',
+    component: LiveMatches
   },
   {
     path: '/marked_matches',
